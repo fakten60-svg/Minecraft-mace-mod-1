@@ -27,6 +27,7 @@ public class MaceSwitchModule extends Module {
 				"Ruestet die Chestplate aus, wechselt zur Mace und greift einen Spieler an, der ca. 3 Bloecke unter dir ist.",
 				ModuleCategory.COMBAT);
 		this.config = config;
+		setEnabled(config.enabled);
 	}
 
 	@Override
@@ -40,7 +41,7 @@ public class MaceSwitchModule extends Module {
 				(min, max) -> {
 					config.initialDelayMin = min;
 					config.initialDelayMax = max;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		addSetting(new RangeSetting("Equip Delay", "ms", 40, 400,
@@ -48,7 +49,7 @@ public class MaceSwitchModule extends Module {
 				(min, max) -> {
 					config.equipToMaceDelayMin = min;
 					config.equipToMaceDelayMax = max;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		addSetting(new RangeSetting("Attack Delay", "ms", 40, 400,
@@ -56,7 +57,7 @@ public class MaceSwitchModule extends Module {
 				(min, max) -> {
 					config.maceToAttackDelayMin = min;
 					config.maceToAttackDelayMax = max;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		// --------------------------------------------------------------
@@ -70,7 +71,7 @@ public class MaceSwitchModule extends Module {
 				(value, unused) -> {
 					config.targetHeightMin = Math.max(0.0, value - tolerance);
 					config.targetHeightMax = value + tolerance;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		addSetting(new SliderSetting("Target Tolerance", "blocks", 0.05, 2.0, Math.max(tolerance, 0.05), 0.05,
@@ -78,7 +79,7 @@ public class MaceSwitchModule extends Module {
 					double currentCenter = (config.targetHeightMin + config.targetHeightMax) / 2.0;
 					config.targetHeightMin = Math.max(0.0, currentCenter - value);
 					config.targetHeightMax = currentCenter + value;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		addSetting(new SliderSetting("Max Distance", "blocks", 1.0, 32.0, config.maxTargetDistance, 0.5,
@@ -87,22 +88,28 @@ public class MaceSwitchModule extends Module {
 					if (config.maxHorizontalDistance > value) {
 						config.maxHorizontalDistance = value;
 					}
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		// --------------------------------------------------------------
 		// Misc behavior switches bound to the existing config fields.
 		// --------------------------------------------------------------
+		addSetting(new BooleanSetting("Ignore Friends", config.ignoreFriends,
+				value -> {
+					config.ignoreFriends = value;
+					ModConfig.requestSave(config);
+				}));
+
 		addSetting(new BooleanSetting("Require Sneaking", config.requireSneaking,
 				value -> {
 					config.requireSneaking = value;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 
 		addSetting(new BooleanSetting("Overlay Messages", config.overlayMessages,
 				value -> {
 					config.overlayMessages = value;
-					ModConfig.save(config);
+					ModConfig.requestSave(config);
 				}));
 	}
 
@@ -110,6 +117,6 @@ public class MaceSwitchModule extends Module {
 	protected void onEnabledChanged(boolean nowEnabled) {
 		// Mirror the GUI state into the master switch the combat module reads.
 		config.enabled = nowEnabled;
-		ModConfig.save(config);
+		ModConfig.requestSave(config);
 	}
 }

@@ -196,6 +196,7 @@ public class CategoryPanel {
 			contentY += component.getHeight();
 		}
 		context.disableScissor();
+
 	}
 
 	public boolean mouseClicked(Click click, double mouseX, double mouseY) {

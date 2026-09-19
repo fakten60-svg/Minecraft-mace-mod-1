@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 import de.aerialmace.config.ModConfig;
+import de.aerialmace.friend.FriendManager;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -49,6 +50,7 @@ public final class TargetSelector {
 				.filter(player -> !player.isRemoved() && player.isAlive() && player.getHealth() > 0.0F)
 				.filter(player -> !self.isSpectator() && !player.isSpectator())
 				.filter(player -> !player.isInvisible())
+				.filter(player -> !config.ignoreFriends || !FriendManager.isFriend(player))
 				.filter(player -> isFriendlyContext(self, player))
 				.map(player -> toInfo(self, player))
 				.filter(info -> info.verticalDelta() >= config.targetHeightMin
@@ -67,6 +69,9 @@ public final class TargetSelector {
 			return false;
 		}
 		if (target.isRemoved() || !target.isAlive() || target.getHealth() <= 0.0F) {
+			return false;
+		}
+		if (config.ignoreFriends && FriendManager.isFriend(target)) {
 			return false;
 		}
 		if (target.getEntityWorld() != self.getEntityWorld()) {

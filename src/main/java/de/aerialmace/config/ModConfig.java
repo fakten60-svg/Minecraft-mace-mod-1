@@ -35,6 +35,9 @@ public final class ModConfig {
 	/** When true the sequence only starts while the local player is sneaking. */
 	public boolean requireSneaking = false;
 
+	/** Friends are excluded from target selection by default. */
+	public boolean ignoreFriends = true;
+
 	// ------------------------------------------------------------------
 	// Targeting
 	// ------------------------------------------------------------------
@@ -65,6 +68,21 @@ public final class ModConfig {
 	public boolean overlayMessages = true;
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	private static ModConfig pendingSave;
+	private static long lastSaveAt;
+
+	/** Marks config dirty; the client flushes at most four times per second. */
+	public static synchronized void requestSave(ModConfig config) {
+		pendingSave = config;
+	}
+
+	public static synchronized void flushPending() {
+		if (pendingSave != null && System.currentTimeMillis() - lastSaveAt >= 250L) {
+			ModConfig config = pendingSave;
+			pendingSave = null;
+			save(config);
+		}
+	}
 
 	public ModConfig() {
 	}
@@ -89,7 +107,8 @@ public final class ModConfig {
 	}
 
 	/** Persists the given config; failures are swallowed on purpose (config is non critical). */
-	public static void save(ModConfig config) {
+	public static synchronized void save(ModConfig config) {
+		lastSaveAt = System.currentTimeMillis();
 		Path path = configPath();
 		try {
 			Files.createDirectories(path.getParent());

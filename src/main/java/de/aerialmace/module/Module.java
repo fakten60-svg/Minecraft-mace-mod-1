@@ -90,6 +90,15 @@ public abstract class Module {
 		toggleListeners.add(listener);
 	}
 
+	/** Called by the client tick bridge for enabled modules. */
+	public final void tick(net.minecraft.client.MinecraftClient client) {
+		if (enabled) onTick(client);
+	}
+
+	/** Hook for modules with per-tick client behavior. */
+	protected void onTick(net.minecraft.client.MinecraftClient client) {
+	}
+
 	/** Hook for subclasses; the base class only tracks the flag. */
 	protected void onEnabledChanged(boolean nowEnabled) {
 	}

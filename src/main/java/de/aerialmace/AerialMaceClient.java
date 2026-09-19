@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import de.aerialmace.config.ConfigManager;
 import de.aerialmace.config.ModConfig;
+import de.aerialmace.friend.FriendManager;
 import de.aerialmace.gui.Animation;
 import de.aerialmace.input.KeybindManager;
 import de.aerialmace.module.ModuleManager;
@@ -44,6 +45,7 @@ public class AerialMaceClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		config = ModConfig.load();
+		FriendManager.load();
 		stateMachine = new SequenceStateMachine(config);
 
 		// ---- Module registry ----------------------------------------------------
@@ -63,14 +65,25 @@ public class AerialMaceClient implements ClientModInitializer {
 		ConfigManager.load(ConfigManager.newPanelPositionMap());
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> stateMachine.reset());
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			stateMachine.reset();
+			FriendManager.save();
+		});
 
 		LOGGER.info("Aerial Mace Automation initialized (enabled: {})", config.enabled);
 	}
 
 	private void onEndClientTick(MinecraftClient client) {
 		KeybindManager.tick(client, clientSettings.getState().guiKey);
+		for (var module : ModuleManager.getModules()) {
+			module.tick(client);
+		}
+		ModConfig.flushPending();
 		stateMachine.tick(client);
+	}
+
+	public static void saveClientData() {
+		FriendManager.save();
 	}
 
 }

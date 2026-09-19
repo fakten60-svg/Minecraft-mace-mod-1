@@ -99,6 +99,7 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 {
   "enabled": true,
   "requireSneaking": false,
+  "ignoreFriends": true,
   "targetHeightMin": 2.85,
   "targetHeightMax": 3.25,
   "maxTargetDistance": 5.5,
@@ -117,6 +118,7 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 | --- | --- |
 | `enabled` | Master-Schalter (auch in-game per Taste **M** umschaltbar) |
 | `requireSneaking` | Sequenz nur starten, während gesneakt wird |
+| `ignoreFriends` | Friends aus der Zielauswahl ausschließen (Standard: true) |
 | `targetHeightMin/Max` | Toleranzfenster für `playerY - targetY` (Standard ≈ 3 Blöcke) |
 | `maxTargetDistance` | maximale Gesamt-Distanz zum Ziel |
 | `maxHorizontalDistance` | maximale horizontale Distanz zum Ziel |
@@ -154,7 +156,10 @@ ModuleManager geladen.
   und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
 
 Die GUI schreibt ausschließlich in die bestehende `config/aerialmace.json` (Modul-Sidebar
-`MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte.
+`MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte. Änderungen werden gedrosselt
+(maximal vier Schreibvorgänge pro Sekunde) und beim Verlassen der Welt werden Friends unter
+`config/aerialmace-friends.json` gespeichert. Friends stehen zentral über `FriendManager` für
+Combat und zukünftige Visual-Module bereit; das Combat-Modul ignoriert sie standardmäßig.
 
 ## Technik
 
