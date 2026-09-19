@@ -3,6 +3,8 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net)
 [![Fabric](https://img.shields.io/badge/Fabric-0.141.6%2B1.21.11-blue)](https://fabricmc.net)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Build](https://github.com/fakten60-svg/Minecraft-mace-mod-1/actions/workflows/build.yml/badge.svg)](https://github.com/fakten60-svg/Minecraft-mace-mod-1/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/fakten60-svg/Minecraft-mace-mod-1?display_name=tag)](https://github.com/fakten60-svg/Minecraft-mace-mod-1/releases)
 
 Client-seitige Fabric-Mod für **Minecraft Java Edition 1.21.11**, die eine automatisierte
 Aerial-Mace-Sequenz ausführt, sobald sich der eigene Spieler **ungefähr 3 Blöcke über einem
@@ -71,6 +73,20 @@ Keine direkten Server-Zustandsänderungen, keine gepanzerten Interna – nur der
 Interaktionspfad des Clients.
 
 ---
+
+## Vorschau
+
+Die folgenden Bilder zeigen die beabsichtigte Oberfläche des Clients. Sie sind bewusst als
+Illustrationen gekennzeichnet; Farben, Positionen, Maßstab und sichtbare Elemente können im Spiel
+konfiguriert werden.
+
+### ClickGUI
+
+![AerialMace ClickGUI](docs/screenshots/clickgui.svg)
+
+### HUD-Editor und Overlay
+
+![AerialMace HUD Editor](docs/screenshots/hud-editor.svg)
 
 ## Installation (für Spieler)
 
@@ -192,6 +208,14 @@ de.aerialmace
 Die Sequenz ist vollständig **nicht-blockierend** implementiert: Delays werden als Deadline
 gespeichert und im Client-Tick geprüft – es gibt nirgends `Thread.sleep()`. Aktionen laufen im
 selben Tick, in dem die Delay-Deadline abläuft, damit das konfigurierte Timing exakt bleibt.
+
+## Release und Qualitätssicherung
+
+Die veröffentlichte JAR liegt auf der [Releases-Seite](../../releases). Jeder Push auf `main` und
+jeder Pull Request wird zusätzlich durch GitHub Actions mit JDK 21 und `./gradlew build` geprüft.
+Die Release-JAR wird aus einem sauberen Gradle-Build erzeugt; `*-sources.jar` ist nur für Entwickler.
+
+Weitere Informationen stehen in [`CHANGELOG.md`](CHANGELOG.md) und [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Lizenz
 
