@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "aerialmace",
+	"version": "${version}",
+	"name": "Aerial Mace Automation",
+	"description": "Automated client-side aerial mace sequence: equips a chestplate, switches to a mace and attacks a player roughly three blocks below.",
+	"authors": [
+		"fakten60"
+	],
+	"contact": {
+		"homepage": "https://github.com/fakten60-svg/Minecraft-mace-mod-1",
+		"sources": "https://github.com/fakten60-svg/Minecraft-mace-mod-1"
+	},
+	"license": "MIT",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"de.aerialmace.AerialMaceClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
