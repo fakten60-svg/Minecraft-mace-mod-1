@@ -7,6 +7,7 @@ import de.aerialmace.config.ConfigManager;
 import de.aerialmace.config.ModConfig;
 import de.aerialmace.friend.FriendManager;
 import de.aerialmace.gui.Animation;
+import de.aerialmace.hud.HudManager;
 import de.aerialmace.input.KeybindManager;
 import de.aerialmace.module.ModuleManager;
 import de.aerialmace.module.modules.AutoGGModule;
@@ -63,11 +64,13 @@ public class AerialMaceClient implements ClientModInitializer {
 		// -------------------------------------------------------------------------
 
 		ConfigManager.load(ConfigManager.newPanelPositionMap());
+		HudManager.initialize();
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			stateMachine.reset();
 			FriendManager.save();
+			HudManager.save();
 		});
 
 		LOGGER.info("Aerial Mace Automation initialized (enabled: {})", config.enabled);

@@ -154,6 +154,12 @@ ModuleManager geladen.
   Reset-Aktionen (Module Settings, Keybinds, Theme, GUI Layout).
 - Panels lassen sich per Drag & Drop verschieben (Header), scrollen bei Überlauf,
   und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
+- Globale Suche: Im ClickGUI direkt tippen, um Module nach Name/Beschreibung zu filtern; ein rotes `!`
+  markiert doppelte Modul-Keybinds.
+- **F6** öffnet den Profil-Manager (Profile erstellen/speichern/laden/löschen), **F7** den Friends-Manager
+  (Name eingeben, Enter zum Hinzufügen, `F` zum Filtern, `[remove]` zum Löschen), **F8** den separaten HUD-Editor.
+  HUD-Elemente für Watermark, FPS, Koordinaten und aktive Module werden unabhängig vom ClickGUI gerendert
+  und ihre Positionen/Sichtbarkeit/Skalierung unter `config/aerialmace-hud.json` gespeichert.
 
 Die GUI schreibt ausschließlich in die bestehende `config/aerialmace.json` (Modul-Sidebar
 `MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte. Änderungen werden gedrosselt

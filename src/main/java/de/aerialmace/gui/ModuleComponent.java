@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.aerialmace.module.Module;
+import de.aerialmace.module.ModuleManager;
 import de.aerialmace.module.setting.Setting;
 
 import net.minecraft.client.gui.Click;
@@ -40,6 +41,13 @@ public class ModuleComponent {
 
 	public Module getModule() {
 		return module;
+	}
+
+	public boolean matches(String query) {
+		if (query == null || query.isBlank()) return true;
+		String normalized = query.toLowerCase(java.util.Locale.ROOT);
+		return module.getName().toLowerCase(java.util.Locale.ROOT).contains(normalized)
+				|| module.getDescription().toLowerCase(java.util.Locale.ROOT).contains(normalized);
 	}
 
 	public void setPosition(int x, int y, int width) {
@@ -103,6 +111,10 @@ public class ModuleComponent {
 		int chipColor = module.isEnabled() ? theme.accent().getColor() : theme.secondaryText().getColor();
 		context.drawText(textRenderer, state, x + width - stateWidth - 6, y + (HEADER_HEIGHT - 8) / 2,
 				chipColor, false);
+		if (ModuleManager.hasKeybindConflict(module)) {
+			context.drawText(textRenderer, "!", x + width - stateWidth - 15,
+					y + (HEADER_HEIGHT - 8) / 2, 0xFFFF5555, false);
+		}
 
 		// Settings area (clipped while animating).
 		if (expandAnim.value() > 0.01f) {

@@ -17,4 +17,7 @@ public interface PanelCallbacks extends GuiCallback {
 
 	/** Resets all panel positions to the default layout. */
 	void resetLayout();
+
+	/** Restores all client-owned state to defaults. */
+	void resetEverything();
 }

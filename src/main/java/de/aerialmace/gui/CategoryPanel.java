@@ -43,6 +43,7 @@ public class CategoryPanel {
 	private int renderOffsetY;
 	private double scrollOffset;
 	private double scrollTarget;
+	private String filter = "";
 	private boolean dragging;
 	private int dragOffsetX;
 	private int dragOffsetY;
@@ -76,6 +77,7 @@ public class CategoryPanel {
 		panel.directComponents.add(actionComponent("Reset Keybinds", callbacks::resetKeybinds, callbacks));
 		panel.directComponents.add(actionComponent("Reset Theme", callbacks::resetTheme, callbacks));
 		panel.directComponents.add(actionComponent("Reset GUI Layout", callbacks::resetLayout, callbacks));
+		panel.directComponents.add(actionComponent("Reset Everything", callbacks::resetEverything, callbacks));
 		return panel;
 	}
 
@@ -126,6 +128,7 @@ public class CategoryPanel {
 	private int totalHeight() {
 		int height = 0;
 		for (ModuleComponent module : modules) {
+			if (!visible(module)) continue;
 			height += module.getHeight();
 		}
 		for (SettingComponent component : directComponents) {
@@ -137,6 +140,14 @@ public class CategoryPanel {
 	public boolean isMouseOverPanel(double mouseX, double mouseY) {
 		return mouseX >= x && mouseX <= x + width
 				&& mouseY >= y + renderOffsetY && mouseY <= y + renderOffsetY + HEADER_HEIGHT + visibleArea;
+	}
+
+	public void setFilter(String filter) {
+		this.filter = filter == null ? "" : filter;
+	}
+
+	private boolean visible(ModuleComponent module) {
+		return module.matches(filter);
 	}
 
 	public void update(float deltaSeconds) {
@@ -186,6 +197,7 @@ public class CategoryPanel {
 		int contentY = panelY + HEADER_HEIGHT - (int) Math.round(scrollOffset);
 		int moduleX = x;
 		for (ModuleComponent module : modules) {
+			if (!visible(module)) continue;
 			module.setPosition(moduleX, contentY, width);
 			module.render(context, mouseX, mouseY, theme);
 			contentY += module.getHeight();
@@ -215,6 +227,7 @@ public class CategoryPanel {
 
 		// Route into module rows (toggle/settings) and direct components.
 		for (ModuleComponent module : modules) {
+			if (!visible(module)) continue;
 			if (module.mouseClicked(click, mouseX, mouseY)) {
 				return true;
 			}
@@ -231,7 +244,7 @@ public class CategoryPanel {
 	public void mouseReleased(Click click) {
 		dragging = false;
 		for (ModuleComponent module : modules) {
-			module.mouseReleased(click);
+			if (visible(module)) module.mouseReleased(click);
 		}
 		for (SettingComponent component : directComponents) {
 			component.mouseReleased(click);
@@ -245,6 +258,7 @@ public class CategoryPanel {
 			return true;
 		}
 		for (ModuleComponent module : modules) {
+			if (!visible(module)) continue;
 			if (module.isDragging()) {
 				module.mouseDragged(click, deltaX, deltaY);
 				return true;
@@ -266,6 +280,7 @@ public class CategoryPanel {
 	/** Forwards keys to components (keybind recording). */
 	public boolean keyPressed(int keyCode) {
 		for (ModuleComponent module : modules) {
+			if (!visible(module)) continue;
 			if (module.keyPressed(keyCode)) {
 				return true;
 			}
@@ -286,7 +301,7 @@ public class CategoryPanel {
 	/** Stops keybind recording for rows the click did not land in. */
 	public void stopRecordingIfOutside(double mouseX, double mouseY) {
 		for (ModuleComponent module : modules) {
-			module.stopRecordingIfOutside(mouseX, mouseY);
+			if (visible(module)) module.stopRecordingIfOutside(mouseX, mouseY);
 		}
 	}
 

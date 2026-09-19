@@ -5,6 +5,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +43,52 @@ public final class ConfigManager {
 
 	private static Path configPath() {
 		return FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE_NAME);
+	}
+
+	private static Path profilesPath() {
+		return FabricLoader.getInstance().getConfigDir().resolve("aerialmace-profiles");
+	}
+
+	private static String safeProfileName(String name) {
+		String value = name == null ? "default" : name.trim().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_-]", "_");
+		return value.isBlank() ? "default" : value.substring(0, Math.min(40, value.length()));
+	}
+
+	/** Saves the current complete GUI/module snapshot as a named profile. */
+	public static synchronized boolean saveProfile(String name) {
+		try {
+			Files.createDirectories(profilesPath());
+			if (!Files.exists(configPath())) save(newPanelPositionMap());
+			Files.copy(configPath(), profilesPath().resolve(safeProfileName(name) + ".json"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			return true;
+		} catch (IOException ignored) { return false; }
+	}
+
+	/** Loads a named snapshot and applies it to the live module/settings state. */
+	public static synchronized boolean loadProfile(String name) {
+		Path profile = profilesPath().resolve(safeProfileName(name) + ".json");
+		if (!Files.exists(profile)) return false;
+		try {
+			Files.copy(profile, configPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			load(newPanelPositionMap());
+			return true;
+		} catch (IOException | RuntimeException ignored) { return false; }
+	}
+
+	public static synchronized boolean deleteProfile(String name) {
+		try { return Files.deleteIfExists(profilesPath().resolve(safeProfileName(name) + ".json")); }
+		catch (IOException ignored) { return false; }
+	}
+
+	public static synchronized List<String> listProfiles() {
+		List<String> result = new ArrayList<>();
+		if (!Files.isDirectory(profilesPath())) return result;
+		try (var files = Files.list(profilesPath())) {
+			files.filter(path -> path.getFileName().toString().endsWith(".json"))
+					.map(path -> path.getFileName().toString().replaceFirst("\\.json$", ""))
+					.sorted().forEach(result::add);
+		} catch (IOException ignored) { }
+		return result;
 	}
 
 	/** Loads everything; missing entries keep their current (default) values. */

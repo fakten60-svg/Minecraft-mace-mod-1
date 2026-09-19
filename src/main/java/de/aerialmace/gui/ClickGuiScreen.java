@@ -15,6 +15,7 @@ import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.input.CharInput;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 
@@ -34,6 +35,7 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	private final Animation openAnimation = new Animation(1.0f);
 	private long lastFrameNanos = System.nanoTime();
 	private boolean needsSave;
+	private String search = "";
 
 	public ClickGuiScreen() {
 		super(Text.literal("AerialMace ClickGUI"));
@@ -74,6 +76,13 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 
 		openAnimation.update(deltaSeconds);
 		float eased = openAnimation.eased();
+
+		// Compact global module search. Typing filters every category panel.
+		context.fill(12, 8, 220, 24, ThemeManager.withAlpha(0xFF16161C, 0xEE));
+		context.drawText(MinecraftClient.getInstance().textRenderer,
+				search.isEmpty() ? "Search modules..." : search, 18, 13,
+				search.isEmpty() ? ThemeManager.get().secondaryText().getColor() : ThemeManager.get().text().getColor(), false);
+		for (CategoryPanel panel : panels) panel.setFilter(search);
 
 		// Dark translucent background overlay.
 		int overlayAlpha = (int) (0xB0 * eased);
@@ -172,6 +181,11 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	public boolean keyPressed(KeyInput input) {
 		int keyCode = input.getKeycode();
 
+		if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) {
+			search = search.substring(0, search.length() - 1);
+			return true;
+		}
+
 		// Keybind recording first.
 		for (CategoryPanel panel : panels) {
 			if (panel.keyPressed(keyCode)) {
@@ -208,6 +222,18 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	public void removed() {
 		ConfigManager.save(collectPanelPositions());
 		super.removed();
+	}
+
+	@Override
+	public boolean charTyped(CharInput input) {
+		if (input.isValidChar()) {
+			char chr = (char) input.codepoint();
+			if (Character.isLetterOrDigit(chr) || chr == '_' || chr == ' ') {
+				if (search.length() < 32) search += chr;
+				return true;
+			}
+		}
+		return super.charTyped(input);
 	}
 
 	@Override
@@ -282,11 +308,23 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	@Override
 	public void resetLayout() {
 		int x = 20;
-		int y = 20;
+		int y = 34;
 		for (CategoryPanel panel : panels) {
 			panel.setPosition(x, y);
 			y += 34;
 		}
+		markDirty();
+	}
+
+	@Override
+	public void resetEverything() {
+		resetModuleSettings();
+		resetKeybinds();
+		resetTheme();
+		resetLayout();
+		de.aerialmace.friend.FriendManager.clear();
+		de.aerialmace.friend.FriendManager.save();
+		markDirty();
 	}
 
 	/** Default accent tint per category. */

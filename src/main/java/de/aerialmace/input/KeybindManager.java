@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.aerialmace.gui.ClickGuiScreen;
+import de.aerialmace.friend.FriendsScreen;
+import de.aerialmace.config.ConfigProfilesScreen;
+import de.aerialmace.hud.HudEditorScreen;
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleManager;
 import de.aerialmace.module.setting.KeybindSetting;
@@ -43,6 +46,19 @@ public final class KeybindManager {
 		// GUI toggle key.
 		if (guiKeyCode != KeybindSetting.NONE && pressedEdge(client, guiKeyCode)) {
 			client.setScreen(new ClickGuiScreen());
+			return;
+		}
+		// Dedicated editors use reserved client keys and never leak into modules.
+		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F6)) {
+			client.setScreen(new ConfigProfilesScreen());
+			return;
+		}
+		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F7)) {
+			client.setScreen(new FriendsScreen());
+			return;
+		}
+		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F8)) {
+			client.setScreen(new HudEditorScreen());
 			return;
 		}
 

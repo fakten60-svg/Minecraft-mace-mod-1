@@ -32,6 +32,15 @@ public final class ModuleManager {
 		return Collections.unmodifiableList(BY_CATEGORY.getOrDefault(category, List.of()));
 	}
 
+	public static boolean hasKeybindConflict(Module source) {
+		int key = source.getKeybind().getKey();
+		if (source.getKeybind().isNone()) return false;
+		for (Module module : MODULES) {
+			if (module != source && module.getKeybind().getKey() == key && !module.getKeybind().isNone()) return true;
+		}
+		return false;
+	}
+
 	public static Module getByName(String name) {
 		for (Module module : MODULES) {
 			if (module.getName().equalsIgnoreCase(name)) {
