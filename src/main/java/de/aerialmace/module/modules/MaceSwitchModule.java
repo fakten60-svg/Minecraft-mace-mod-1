@@ -35,7 +35,16 @@ public class MaceSwitchModule extends Module {
 		// --------------------------------------------------------------
 		// Random delay ranges (rendered as two-handle range bars).
 		// Defaults come from the existing config, so previous values survive.
+		// The two optional ranges add target-settling and post-attack cooldown timing.
 		// --------------------------------------------------------------
+		addSetting(new RangeSetting("Target Lock Delay", "ms", 0, 500,
+				config.targetLockDelayMin, config.targetLockDelayMax, 1,
+				(min, max) -> {
+					config.targetLockDelayMin = min;
+					config.targetLockDelayMax = max;
+					ModConfig.requestSave(config);
+				}));
+
 		addSetting(new RangeSetting("Initial Delay", "ms", 40, 400,
 				config.initialDelayMin, config.initialDelayMax, 1,
 				(min, max) -> {
@@ -57,6 +66,14 @@ public class MaceSwitchModule extends Module {
 				(min, max) -> {
 					config.maceToAttackDelayMin = min;
 					config.maceToAttackDelayMax = max;
+					ModConfig.requestSave(config);
+				}));
+
+		addSetting(new RangeSetting("Post-Attack Cooldown", "ms", 0, 500,
+				config.postAttackDelayMin, config.postAttackDelayMax, 1,
+				(min, max) -> {
+					config.postAttackDelayMin = min;
+					config.postAttackDelayMax = max;
 					ModConfig.requestSave(config);
 				}));
 

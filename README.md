@@ -24,12 +24,16 @@ Sind alle Startbedingungen erfüllt, läuft folgende Sequenz ab:
 IDLE
  ↓  (Ziel erkannt: Spieler ~3 Blöcke unterhalb, in Reichweite)
 TARGET_FOUND
- ↓  Initial Delay:      zufällig 100–120 ms
+ ↓  Target Lock Delay:   zufällig konfigurierbar (Standard 0 ms)
+TARGET_LOCK_DELAY
+ ↓  Initial Delay:       zufällig 100–120 ms
 EQUIP_CHESTPLATE        (Item in der Hand via Vanilla-Inventarklick als Brustplatte ausrüsten)
  ↓  Equip → Mace Delay: zufällig 70–80 ms
 SWITCH_TO_MACE          (Hotbar-Slot mit einer Mace, wie ein normaler Hotbar-Wechsel)
  ↓  Mace → Attack Delay: zufällig 67–90 ms
 ATTACK                  (normaler Angriff: attackEntity + Swing, wie ein echter Linksklick)
+ ↓  Post-Attack Cooldown: zufällig konfigurierbar (Standard 0 ms)
+POST_ATTACK_DELAY
  ↓
 IDLE
 ```
@@ -120,12 +124,16 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
   "targetHeightMax": 3.25,
   "maxTargetDistance": 5.5,
   "maxHorizontalDistance": 4.5,
+  "targetLockDelayMin": 0,
+  "targetLockDelayMax": 0,
   "initialDelayMin": 100,
   "initialDelayMax": 120,
   "equipToMaceDelayMin": 70,
   "equipToMaceDelayMax": 80,
   "maceToAttackDelayMin": 67,
   "maceToAttackDelayMax": 90,
+  "postAttackDelayMin": 0,
+  "postAttackDelayMax": 0,
   "overlayMessages": true
 }
 ```
@@ -138,9 +146,11 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 | `targetHeightMin/Max` | Toleranzfenster für `playerY - targetY` (Standard ≈ 3 Blöcke) |
 | `maxTargetDistance` | maximale Gesamt-Distanz zum Ziel |
 | `maxHorizontalDistance` | maximale horizontale Distanz zum Ziel |
+| `targetLockDelayMin/Max` | zusätzlicher Delay nach Zielerkennung zum Stabilisieren (ms, Standard 0) |
 | `initialDelayMin/Max` | Delay vor dem Ausrüsten (ms, inklusive) |
 | `equipToMaceDelayMin/Max` | Delay zwischen Ausrüsten und Mace-Wechsel (ms, inklusive) |
 | `maceToAttackDelayMin/Max` | Delay zwischen Mace-Wechsel und Angriff (ms, inklusive) |
+| `postAttackDelayMin/Max` | Cooldown nach dem Angriff vor dem nächsten Durchlauf (ms, Standard 0) |
 | `overlayMessages` | Statusmeldungen über der Hotbar anzeigen |
 
 Kaputte oder fehlte Werte werden beim Start automatisch auf zulässige Bereiche korrigiert.
@@ -160,7 +170,7 @@ ModuleManager geladen.
 
 - **Linksklick** auf ein Modul: ON/OFF (animiert)
 - **Rechtsklick** auf ein Modul: Settings ein-/ausklappen
-- **Random-Delays** (Initial/Equip/Attack) werden als **Range-Bar mit zwei Handles**
+- **Random-Delays** (Target Lock/Initial/Equip/Attack/Post-Attack) werden als **Range-Bar mit zwei Handles**
   dargestellt – beide Punkte sind einzeln verschiebbar, Min < Max wird erzwungen, und die
   Combat-Logik übernimmt die Werte sofort.
 - **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,

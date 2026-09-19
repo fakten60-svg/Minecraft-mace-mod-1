@@ -57,12 +57,20 @@ public final class ModConfig {
 	// initial 100-120, equip -> mace 70-80, mace -> attack 67-90.
 	// ------------------------------------------------------------------
 
+	/** Optional extra settling delay after a target is acquired, before the initial delay. */
+	public int targetLockDelayMin = 0;
+	public int targetLockDelayMax = 0;
+
 	public int initialDelayMin = 100;
 	public int initialDelayMax = 120;
 	public int equipToMaceDelayMin = 70;
 	public int equipToMaceDelayMax = 80;
 	public int maceToAttackDelayMin = 67;
 	public int maceToAttackDelayMax = 90;
+
+	/** Optional cooldown after an attack before the machine can return to IDLE. */
+	public int postAttackDelayMin = 0;
+	public int postAttackDelayMax = 0;
 
 	/** Shows short status messages above the hotbar. */
 	public boolean overlayMessages = true;
@@ -131,12 +139,16 @@ public final class ModConfig {
 		maxTargetDistance = clamp(maxTargetDistance, 1.0, 64.0);
 		maxHorizontalDistance = clamp(maxHorizontalDistance, 0.5, maxTargetDistance);
 
+		targetLockDelayMin = clamp(targetLockDelayMin, 0, 10_000);
+		targetLockDelayMax = clamp(targetLockDelayMax, targetLockDelayMin, 10_000);
 		initialDelayMin = clamp(initialDelayMin, 0, 10_000);
 		initialDelayMax = clamp(initialDelayMax, initialDelayMin, 10_000);
 		equipToMaceDelayMin = clamp(equipToMaceDelayMin, 0, 10_000);
 		equipToMaceDelayMax = clamp(equipToMaceDelayMax, equipToMaceDelayMin, 10_000);
 		maceToAttackDelayMin = clamp(maceToAttackDelayMin, 0, 10_000);
 		maceToAttackDelayMax = clamp(maceToAttackDelayMax, maceToAttackDelayMin, 10_000);
+		postAttackDelayMin = clamp(postAttackDelayMin, 0, 10_000);
+		postAttackDelayMax = clamp(postAttackDelayMax, postAttackDelayMin, 10_000);
 	}
 
 	private static double clamp(double value, double min, double max) {

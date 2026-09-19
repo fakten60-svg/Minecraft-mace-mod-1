@@ -87,7 +87,10 @@ public class RangeComponent extends SettingComponent {
 
 		double distMin = Math.abs(mouseX - (barX + minPos));
 		double distMax = Math.abs(mouseX - (barX + maxPos));
-		if (distMin <= distMax) {
+		// When both handles overlap (the valid 0–0 default for optional delays),
+		// choose the side of the shared handle so the user can grow the range in either direction.
+		boolean chooseMin = distMin < distMax || (distMin == distMax && mouseX < barX + minPos);
+		if (chooseMin) {
 			draggingMin = true;
 			range.setMinValue(valueFromMouse(mouseX));
 		} else {

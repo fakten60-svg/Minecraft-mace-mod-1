@@ -4,6 +4,9 @@
 
 ### Added
 
+- Additional configurable random-delay ranges for target lock settling and post-attack cooldown.
+- New non-blocking `TARGET_LOCK_DELAY` and `POST_ATTACK_DELAY` state-machine phases; both default to 0 ms for backward-compatible timing.
+
 - Existing non-blocking aerial mace sequence for Minecraft 1.21.11.
 - Fabric client module system with generic Boolean, Slider, Range, Mode, Keybind, Color, and Action settings.
 - Animated ClickGUI with Combat, Visuals, Movement, Misc, and Client Settings panels.

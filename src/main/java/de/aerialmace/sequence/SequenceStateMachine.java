@@ -39,12 +39,14 @@ public final class SequenceStateMachine {
 	public enum State {
 		IDLE,
 		TARGET_FOUND,
+		TARGET_LOCK_DELAY,
 		INITIAL_DELAY,
 		EQUIP_CHESTPLATE,
 		EQUIP_DELAY,
 		SWITCH_TO_MACE,
 		MACE_DELAY,
-		ATTACK
+		ATTACK,
+		POST_ATTACK_DELAY
 	}
 
 	/** Hard cap so a wedged machine can never keep a sequence alive forever. */
@@ -105,13 +107,15 @@ public final class SequenceStateMachine {
 
 		switch (state) {
 			case IDLE -> tryStart(client);
-			case TARGET_FOUND -> beginInitialDelay(client);
+			case TARGET_FOUND -> beginTargetLockDelay(client);
+			case TARGET_LOCK_DELAY -> waitAndThen(client, State.INITIAL_DELAY, this::beginInitialDelay);
 			case INITIAL_DELAY -> waitAndThen(client, State.EQUIP_CHESTPLATE, this::performEquipChestplate);
 			case EQUIP_CHESTPLATE -> performEquipChestplate(client);
 			case EQUIP_DELAY -> waitAndThen(client, State.SWITCH_TO_MACE, this::performSwitchToMace);
 			case SWITCH_TO_MACE -> performSwitchToMace(client);
 			case MACE_DELAY -> waitAndThen(client, State.ATTACK, this::performAttack);
 			case ATTACK -> performAttack(client);
+			case POST_ATTACK_DELAY -> finishPostAttackDelay(client);
 		}
 	}
 
@@ -144,6 +148,14 @@ public final class SequenceStateMachine {
 	// ------------------------------------------------------------------
 	// Phase 1: chestplate
 	// ------------------------------------------------------------------
+
+	private void beginTargetLockDelay(MinecraftClient client) {
+		if (!preconditionsHold(client)) {
+			return;
+		}
+		currentDelayMs = Delays.randomDelay(config.targetLockDelayMin, config.targetLockDelayMax);
+		transition(State.TARGET_LOCK_DELAY, client);
+	}
 
 	private void beginInitialDelay(MinecraftClient client) {
 		if (!preconditionsHold(client)) {
@@ -220,12 +232,23 @@ public final class SequenceStateMachine {
 		interactionManager.attackEntity(player, currentTarget);
 		player.swingHand(Hand.MAIN_HAND);
 
-		transition(State.IDLE, client);
+		currentDelayMs = Delays.randomDelay(config.postAttackDelayMin, config.postAttackDelayMax);
+		transition(State.POST_ATTACK_DELAY, client);
 	}
 
 	// ------------------------------------------------------------------
 	// Helpers
 	// ------------------------------------------------------------------
+
+	private void finishPostAttackDelay(MinecraftClient client) {
+		if (client.player == null || client.world == null) {
+			reset();
+			return;
+		}
+		if (nowMs() - stateEnteredAtMs >= currentDelayMs) {
+			transition(State.IDLE, client);
+		}
+	}
 
 	private void waitAndThen(MinecraftClient client, State actionState, Consumer<MinecraftClient> action) {
 		if (!preconditionsHold(client)) {
