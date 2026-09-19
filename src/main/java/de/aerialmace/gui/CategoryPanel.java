@@ -24,9 +24,9 @@ import net.minecraft.client.gui.DrawContext;
  */
 public class CategoryPanel {
 
-	private static final int HEADER_HEIGHT = 18;
-	private static final int MAX_VISIBLE_HEIGHT = 220;
-	private static final int PANEL_WIDTH = 130;
+	private static final int HEADER_HEIGHT = 22;
+	private static final int MAX_VISIBLE_HEIGHT = 260;
+	private static final int PANEL_WIDTH = 160;
 
 	private final String storageKey;
 	private final String title;
@@ -72,6 +72,8 @@ public class CategoryPanel {
 		panel.directComponents.add(new ColorPickerComponent(theme.moduleActive(), callbacks));
 		panel.directComponents.add(new ColorPickerComponent(theme.text(), callbacks));
 		panel.directComponents.add(new ColorPickerComponent(theme.secondaryText(), callbacks));
+		panel.directComponents.add(new ColorPickerComponent(theme.border(), callbacks));
+		panel.directComponents.add(new ColorPickerComponent(theme.hover(), callbacks));
 
 		panel.directComponents.add(actionComponent("Reset Module Settings", callbacks::resetModuleSettings, callbacks));
 		panel.directComponents.add(actionComponent("Reset Keybinds", callbacks::resetKeybinds, callbacks));
@@ -181,15 +183,19 @@ public class CategoryPanel {
 		int panelHeight = HEADER_HEIGHT + visibleArea;
 
 		// Panel background + border.
-		GuiRenderUtil.borderedRect(context, x - 1, panelY - 1, width + 2, panelHeight + 2,
-				theme.panel().getColor(), ThemeManager.withAlpha(0xFFFFFFFF, 0x22));
+		if (theme.showBorders()) {
+			GuiRenderUtil.borderedRect(context, x - 1, panelY - 1, width + 2, panelHeight + 2,
+					theme.panel().getColor(), theme.border().getColor());
+		} else {
+			context.fill(x, panelY, x + width, panelY + panelHeight, theme.panel().getColor());
+		}
 
 		// Header.
 		int headerFill = ThemeManager.lerp(theme.panel().getColor(), headerColor, 0.22f);
 		context.fill(x, panelY, x + width, panelY + HEADER_HEIGHT, headerFill);
 		context.fill(x, panelY + HEADER_HEIGHT - 2, x + width, panelY + HEADER_HEIGHT,
 				ThemeManager.withAlpha(headerColor, 0x90));
-		context.drawText(textRenderer, title, x + 6, panelY + (HEADER_HEIGHT - 8) / 2,
+		context.drawText(textRenderer, title, x + 8, panelY + (HEADER_HEIGHT - 8) / 2,
 				theme.text().getColor(), false);
 
 		// Body (clipped => per-panel scrolling).

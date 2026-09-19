@@ -146,6 +146,8 @@ public final class ConfigManager {
 			applyIfPresent(theme, "moduleActive", ThemeManager.get().moduleActive());
 			applyIfPresent(theme, "text", ThemeManager.get().text());
 			applyIfPresent(theme, "secondaryText", ThemeManager.get().secondaryText());
+			applyIfPresent(theme, "border", ThemeManager.get().border());
+			applyIfPresent(theme, "hover", ThemeManager.get().hover());
 		}
 	}
 
@@ -186,6 +188,8 @@ public final class ConfigManager {
 		theme.add("moduleActive", ThemeManager.get().moduleActive().toJson());
 		theme.add("text", ThemeManager.get().text().toJson());
 		theme.add("secondaryText", ThemeManager.get().secondaryText().toJson());
+		theme.add("border", ThemeManager.get().border().toJson());
+		theme.add("hover", ThemeManager.get().hover().toJson());
 		root.add("theme", theme);
 
 		try {

@@ -25,6 +25,9 @@ public final class ThemeManager {
 	private final ColorSetting moduleActive = new ColorSetting("Module Active Color", 0xFF22303F);
 	private final ColorSetting text = new ColorSetting("Text Color", 0xFFF2F2F2);
 	private final ColorSetting secondaryText = new ColorSetting("Secondary Text Color", 0xFF9A9AA5);
+	private final ColorSetting border = new ColorSetting("Border Color", 0x503B82F6);
+	private final ColorSetting hover = new ColorSetting("Hover Color", 0x243B82F6);
+	private boolean showBorders = true;
 
 	public ColorSetting accent() {
 		return accent;
@@ -50,6 +53,22 @@ public final class ThemeManager {
 		return secondaryText;
 	}
 
+	public ColorSetting border() {
+		return border;
+	}
+
+	public ColorSetting hover() {
+		return hover;
+	}
+
+	public boolean showBorders() {
+		return showBorders;
+	}
+
+	public void setShowBorders(boolean showBorders) {
+		this.showBorders = showBorders;
+	}
+
 	/** Derived surface color (slightly lighter than the panel) for knobs/inputs. */
 	public int surface() {
 		return lerp(panel.getColor(), 0xFF2A2A33, 0.35f);
@@ -57,7 +76,7 @@ public final class ThemeManager {
 
 	/** Derived hover overlay (subtle white wash). */
 	public int hoverOverlay() {
-		return withAlpha(0xFFFFFFFF, 0x14);
+		return hover.getColor();
 	}
 
 	/** ARGB int helpers used all over the GUI. */
