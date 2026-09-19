@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.aerialmace.config.CloudConfigs;
-import de.aerialmace.config.CloudConfigSync;
 import de.aerialmace.config.ConfigManager;
 import de.aerialmace.config.ModConfig;
 import de.aerialmace.friend.FriendManager;
@@ -53,7 +52,6 @@ public class AerialMaceClient implements ClientModInitializer {
 		activeConfig = config;
 		FriendManager.load();
 		stateMachine = new SequenceStateMachine(config);
-		CloudConfigSync.start(config);
 
 		// ---- Module registry ----------------------------------------------------
 		ModuleManager.register(new MaceSwitchModule(config)); // binds EXISTING combat logic
@@ -87,7 +85,6 @@ public class AerialMaceClient implements ClientModInitializer {
 		for (var module : ModuleManager.getModules()) {
 			module.tick(client);
 		}
-		CloudConfigSync.poll(config);
 		CloudConfigs.poll(config);
 		ModConfig.flushPending();
 		stateMachine.tick(client);

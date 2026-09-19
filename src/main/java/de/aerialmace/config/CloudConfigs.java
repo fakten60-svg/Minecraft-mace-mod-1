@@ -255,11 +255,11 @@ public final class CloudConfigs {
             for (var entry : shared.getAsJsonObject().entrySet()) {
                 merged.add(entry.getKey(), entry.getValue());
             }
-            // Cloud settings themselves stay local: a shared config cannot redirect the client.
+            // Cloud settings themselves stay local: a shared config can never redirect the
+            // client to another endpoint or leak the configured key.
             merged.addProperty("cloudShareUrl", local.cloudShareUrl);
             merged.addProperty("cloudShareKey", local.cloudShareKey);
-            merged.addProperty("cloudConfigUrl", local.cloudConfigUrl);
-            merged.addProperty("cloudSyncEnabled", local.cloudSyncEnabled);
+            merged.addProperty("cloudAuthor", local.cloudAuthor);
             ModConfig result = GSON.fromJson(merged, ModConfig.class);
             if (result != null) {
                 result.normalize();

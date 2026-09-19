@@ -16,7 +16,8 @@
 - Sprint module with Legit/Rage, omnidirectional, keep-sprint, and forward requirements.
 - Search, keybind-conflict indicators, profile manager, Friends screen, HUD overlay, and HUD editor.
 - Persistent GUI, module, friend, profile, and HUD configuration.
-- GitHub Actions build validation and release artifact workflow.
+- GitHub Actions build validation for pushes and pull requests.
+- Cloud config sharing for client configs only; releases stay manual and independent.
 
 ### Verification
 

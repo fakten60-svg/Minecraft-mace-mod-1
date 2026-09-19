@@ -75,10 +75,10 @@ public final class ModConfig {
 	/** Shows short status messages above the hotbar. */
 	public boolean overlayMessages = true;
 
-	/** Optional read-only cloud config sync; disabled by default for offline-first behavior. */
-	public boolean cloudSyncEnabled = false;
-	/** HTTPS URL to a JSON object containing only the settings that should be overridden. */
-	public String cloudConfigUrl = "";
+	// ------------------------------------------------------------------
+	// Cloud configs (client config sharing only - never releases).
+	// The client never stores private keys; only the public anon key is used.
+	// ------------------------------------------------------------------
 
 	/** Supabase project URL used by the shared cloud configs (client config sharing). */
 	public String cloudShareUrl = "";
@@ -191,8 +191,6 @@ public final class ModConfig {
 		this.postAttackDelayMin = other.postAttackDelayMin;
 		this.postAttackDelayMax = other.postAttackDelayMax;
 		this.overlayMessages = other.overlayMessages;
-		this.cloudSyncEnabled = other.cloudSyncEnabled;
-		this.cloudConfigUrl = other.cloudConfigUrl;
 		this.cloudShareUrl = other.cloudShareUrl;
 		this.cloudShareKey = other.cloudShareKey;
 		this.cloudAuthor = other.cloudAuthor;
@@ -205,8 +203,6 @@ public final class ModConfig {
 	public ModConfig sanitizedForSharing() {
 		ModConfig copy = new ModConfig();
 		copy.copyFrom(this);
-		copy.cloudSyncEnabled = false;
-		copy.cloudConfigUrl = "";
 		copy.cloudShareUrl = "";
 		copy.cloudShareKey = "";
 		copy.cloudAuthor = "";

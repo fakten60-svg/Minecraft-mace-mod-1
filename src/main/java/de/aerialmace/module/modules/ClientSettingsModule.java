@@ -2,7 +2,6 @@ package de.aerialmace.module.modules;
 
 import java.util.List;
 
-import de.aerialmace.config.CloudConfigSync;
 import de.aerialmace.config.ModConfig;
 import de.aerialmace.gui.Animation;
 import de.aerialmace.module.Module;
@@ -89,12 +88,7 @@ public class ClientSettingsModule extends Module {
 				value -> de.aerialmace.gui.ThemeManager.get().setShowBorders(value)));
 
 		if (combatConfig != null) {
-			addSetting(new BooleanSetting("Cloud Config Sync", combatConfig.cloudSyncEnabled,
-					value -> {
-						combatConfig.cloudSyncEnabled = value;
-						ModConfig.requestSave(combatConfig);
-					}));
-			addSetting(new ActionSetting("Sync Cloud Config", () -> CloudConfigSync.request(combatConfig)));
+			// Cloud features are strictly for sharing client configs - never for releases.
 			addSetting(new ActionSetting("Open Cloud Configs",
 					() -> net.minecraft.client.MinecraftClient.getInstance()
 							.setScreen(new de.aerialmace.config.CloudConfigsScreen(combatConfig))));

@@ -135,8 +135,6 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
   "postAttackDelayMin": 0,
   "postAttackDelayMax": 0,
   "overlayMessages": true,
-  "cloudSyncEnabled": false,
-  "cloudConfigUrl": "",
   "cloudShareUrl": "",
   "cloudShareKey": "",
   "cloudAuthor": ""
@@ -157,8 +155,6 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 | `maceToAttackDelayMin/Max` | Delay zwischen Mace-Wechsel und Angriff (ms, inklusive) |
 | `postAttackDelayMin/Max` | Cooldown nach dem Angriff vor dem nächsten Durchlauf (ms, Standard 0) |
 | `overlayMessages` | Statusmeldungen über der Hotbar anzeigen |
-| `cloudSyncEnabled` | opt-in read-only URL-Config-Sync aktivieren |
-| `cloudConfigUrl` | HTTPS-URL zu einer öffentlichen JSON-Config; niemals Tokens eintragen |
 | `cloudShareUrl` | Supabase Project URL für die geteilten Cloud-Configs |
 | `cloudShareKey` | öffentlicher Supabase anon key (kein Service-Key) |
 | `cloudAuthor` | Anzeigename beim Hochladen einer Cloud-Config |
@@ -186,8 +182,8 @@ ModuleManager geladen.
 - **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,
   **ESC** setzt zurück auf **NONE**. Module haben standardmäßig **keinen** Keybind.
 - **Client-Settings-Panel**: GUI-Keybind, GUI-Scale, Animation Speed, Blur, Click Sounds,
-  Cloud Config Sync und manueller Sync-Button,
-  Search Bar, Panel Borders und Theme (Dark/Midnight/Neon/Ocean/Mono). Der Color Picker bietet
+  Button zum Öffnen der Cloud-Configs, Search Bar, Panel Borders und Theme
+  (Dark/Midnight/Neon/Ocean/Mono). Der Color Picker bietet
   Accent-, Background-, Panel-, Active-, Text-, Secondary-Text-, Border- und Hover-Farben sowie
   Reset-Aktionen (Module Settings, Keybinds, Theme, GUI Layout).
 - Panels lassen sich per Drag & Drop verschieben (Header), scrollen bei Überlauf,
@@ -265,16 +261,12 @@ lädt die jeweilige Cloud-Config herunter und übernimmt sie sofort. **R** aktua
 - Heruntergeladene Configs können die Cloud-Einstellungen nicht verändern (kein Redirect).
 - Nur HTTPS, begrenzte Antwortgröße, alles asynchron, Offline-Betrieb bleibt möglich.
 
-### Zusätzlicher URL-Sync
-
-Zusätzlich gibt es einen einfachen read-only Sync: `cloudSyncEnabled: true` plus eine HTTPS-URL in
-`cloudConfigUrl` liest beim Start ein JSON-Objekt und übernimmt daraus nur die enthaltenen Felder.
-
 ## Releases
 
-Releases sind unabhängig von den Cloud-Configs und laufen weiterhin über Version-Tags. Ein Tag nach
-Schema `v*` (zum Beispiel `v1.1.0`) löst `.github/workflows/release.yml` aus: Die Mod wird mit Java 21
-gebaut und die kompilierte JAR automatisch an den GitHub Release angehängt.
+Releases sind bewusst getrennt von den Cloud-Configs und laufen wie gewohnt über die
+[Releases-Seite](../../releases): die JAR wird mit `./gradlew build` erzeugt und manuell an den
+Release angehängt. Es gibt keine Automatik, die Releases mit Cloud-Funktionen verbindet — Cloud ist
+ausschließlich für die Client-Configs zuständig.
 
 ## Release und Qualitätssicherung
 
