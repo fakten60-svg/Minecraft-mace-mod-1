@@ -13,7 +13,7 @@ import net.minecraft.client.gui.DrawContext;
 public abstract class SettingComponent {
 
 	protected static final int PADDING = 5;
-	protected static final int ROW_HEIGHT = 15;
+	protected static final int ROW_HEIGHT = 18;
 
 	protected final Setting setting;
 	protected final GuiCallback callback;

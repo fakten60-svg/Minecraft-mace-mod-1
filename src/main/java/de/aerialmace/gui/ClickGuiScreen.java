@@ -51,15 +51,15 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		}
 		panels.add(CategoryPanel.clientSettingsPanel(this));
 
-		// Default layout: staggered column; saved positions are applied when present.
-		int x = 20;
-		int y = 20;
-		for (CategoryPanel panel : panels) {
+		// Default layout: a clean four-column grid; saved positions win when present.
+		for (int index = 0; index < panels.size(); index++) {
+			CategoryPanel panel = panels.get(index);
 			if (panel.hasSavedPosition()) {
 				panel.applySavedPosition();
 			} else {
-				panel.setPosition(x, y);
-				y += 34;
+				int column = index % 4;
+				int row = index / 4;
+				panel.setPosition(20 + column * 176, 34 + row * 292);
 			}
 		}
 
@@ -78,10 +78,14 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		float eased = openAnimation.eased();
 
 		// Compact global module search. Typing filters every category panel.
-		context.fill(12, 8, 220, 24, ThemeManager.withAlpha(0xFF16161C, 0xEE));
-		context.drawText(MinecraftClient.getInstance().textRenderer,
-				search.isEmpty() ? "Search modules..." : search, 18, 13,
-				search.isEmpty() ? ThemeManager.get().secondaryText().getColor() : ThemeManager.get().text().getColor(), false);
+		var clientSettings = de.aerialmace.module.modules.ClientSettingsModule.get();
+		boolean showSearch = clientSettings == null || clientSettings.getState().showSearch;
+		if (showSearch) {
+			context.fill(12, 8, 220, 24, ThemeManager.get().surface());
+			context.drawText(MinecraftClient.getInstance().textRenderer,
+					search.isEmpty() ? "Search modules..." : search, 18, 13,
+					search.isEmpty() ? ThemeManager.get().secondaryText().getColor() : ThemeManager.get().text().getColor(), false);
+		}
 		for (CategoryPanel panel : panels) panel.setFilter(search);
 
 		// Dark translucent background overlay.
@@ -303,15 +307,17 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		ThemeManager.get().moduleActive().reset();
 		ThemeManager.get().text().reset();
 		ThemeManager.get().secondaryText().reset();
+		ThemeManager.get().border().reset();
+		ThemeManager.get().hover().reset();
+		ThemeManager.get().setShowBorders(true);
 	}
 
 	@Override
 	public void resetLayout() {
-		int x = 20;
-		int y = 34;
-		for (CategoryPanel panel : panels) {
-			panel.setPosition(x, y);
-			y += 34;
+		for (int index = 0; index < panels.size(); index++) {
+			int column = index % 4;
+			int row = index / 4;
+			panels.get(index).setPosition(20 + column * 176, 34 + row * 292);
 		}
 		markDirty();
 	}

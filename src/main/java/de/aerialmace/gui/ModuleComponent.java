@@ -18,7 +18,7 @@ import net.minecraft.client.MinecraftClient;
  */
 public class ModuleComponent {
 
-	private static final int HEADER_HEIGHT = 16;
+	private static final int HEADER_HEIGHT = 19;
 
 	private final Module module;
 	private final GuiCallback callback;
@@ -102,7 +102,7 @@ public class ModuleComponent {
 					ThemeManager.withAlpha(theme.accent().getColor(), (int) (0xFF * eased)));
 		}
 
-		context.drawText(textRenderer, module.getName(), x + 6, y + (HEADER_HEIGHT - 8) / 2,
+		context.drawText(textRenderer, module.getName(), x + 8, y + (HEADER_HEIGHT - 8) / 2,
 				theme.text().getColor(), false);
 
 		// ON/OFF chip on the right.

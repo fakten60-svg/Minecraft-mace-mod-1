@@ -28,6 +28,7 @@ public class ClientSettingsModule extends Module {
 		public double animationSpeed = 1.0;
 		public boolean blur = true;
 		public boolean clickSounds = true;
+		public boolean showSearch = true;
 		public String theme = "Dark";
 	}
 
@@ -73,7 +74,12 @@ public class ClientSettingsModule extends Module {
 
 		addSetting(new BooleanSetting("Click Sounds", true, value -> state.clickSounds = value));
 
-		addSetting(new ModeSetting("Theme", List.of("Dark", "Midnight", "Mono"), "Dark",
+		addSetting(new BooleanSetting("Show Search Bar", true, value -> state.showSearch = value));
+
+		addSetting(new BooleanSetting("Panel Borders", true,
+				value -> de.aerialmace.gui.ThemeManager.get().setShowBorders(value)));
+
+		addSetting(new ModeSetting("Theme", List.of("Dark", "Midnight", "Neon", "Ocean", "Mono"), "Dark",
 				value -> {
 					state.theme = value;
 					applyThemePreset(value);
@@ -91,6 +97,28 @@ public class ClientSettingsModule extends Module {
 				tm.moduleActive().setColor(0xFF1D1B36);
 				tm.text().setColor(0xFFE4E4F0);
 				tm.secondaryText().setColor(0xFF8888A8);
+				tm.border().setColor(0x604F46E5);
+				tm.hover().setColor(0x302D1B69);
+			}
+			case "Neon" -> {
+				tm.accent().setColor(0xFF22D3EE);
+				tm.background().setColor(0xC0060710);
+				tm.panel().setColor(0xE00B1220);
+				tm.moduleActive().setColor(0xFF12333D);
+				tm.text().setColor(0xFFE6FFFB);
+				tm.secondaryText().setColor(0xFF77A9B5);
+				tm.border().setColor(0x6034D399);
+				tm.hover().setColor(0x3034D399);
+			}
+			case "Ocean" -> {
+				tm.accent().setColor(0xFF38BDF8);
+				tm.background().setColor(0xC0071724);
+				tm.panel().setColor(0xE00B2233);
+				tm.moduleActive().setColor(0xFF123B52);
+				tm.text().setColor(0xFFE0F2FE);
+				tm.secondaryText().setColor(0xFF7FA8BC);
+				tm.border().setColor(0x6040C4FF);
+				tm.hover().setColor(0x3038BDF8);
 			}
 			case "Mono" -> {
 				tm.accent().setColor(0xFFE5E5E5);
@@ -99,6 +127,8 @@ public class ClientSettingsModule extends Module {
 				tm.moduleActive().setColor(0xFF303030);
 				tm.text().setColor(0xFFF5F5F5);
 				tm.secondaryText().setColor(0xFF9C9C9C);
+				tm.border().setColor(0x50FFFFFF);
+				tm.hover().setColor(0x24FFFFFF);
 			}
 			default -> {
 				tm.accent().setColor(0xFF3B82F6);
@@ -107,6 +137,8 @@ public class ClientSettingsModule extends Module {
 				tm.moduleActive().setColor(0xFF22303F);
 				tm.text().setColor(0xFFF2F2F2);
 				tm.secondaryText().setColor(0xFF9A9AA5);
+				tm.border().setColor(0x503B82F6);
+				tm.hover().setColor(0x243B82F6);
 			}
 		}
 	}

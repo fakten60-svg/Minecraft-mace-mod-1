@@ -176,7 +176,8 @@ ModuleManager geladen.
 - **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,
   **ESC** setzt zurück auf **NONE**. Module haben standardmäßig **keinen** Keybind.
 - **Client-Settings-Panel**: GUI-Keybind, GUI-Scale, Animation Speed, Blur, Click Sounds,
-  Theme (Dark/Midnight/Mono), Color Picker für Accent/Background/Panel/Text-Farben sowie
+  Search Bar, Panel Borders und Theme (Dark/Midnight/Neon/Ocean/Mono). Der Color Picker bietet
+  Accent-, Background-, Panel-, Active-, Text-, Secondary-Text-, Border- und Hover-Farben sowie
   Reset-Aktionen (Module Settings, Keybinds, Theme, GUI Layout).
 - Panels lassen sich per Drag & Drop verschieben (Header), scrollen bei Überlauf,
   und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
