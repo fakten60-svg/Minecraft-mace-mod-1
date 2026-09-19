@@ -5,6 +5,7 @@ import java.util.Map;
 
 import de.aerialmace.gui.ClickGuiScreen;
 import de.aerialmace.friend.FriendsScreen;
+import de.aerialmace.config.CloudConfigsScreen;
 import de.aerialmace.config.ConfigProfilesScreen;
 import de.aerialmace.hud.HudEditorScreen;
 import de.aerialmace.module.Module;
@@ -59,6 +60,10 @@ public final class KeybindManager {
 		}
 		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F8)) {
 			client.setScreen(new HudEditorScreen());
+			return;
+		}
+		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F9)) {
+			client.setScreen(new CloudConfigsScreen(de.aerialmace.AerialMaceClient.getConfig()));
 			return;
 		}
 

@@ -2,9 +2,12 @@ package de.aerialmace.module.modules;
 
 import java.util.List;
 
+import de.aerialmace.config.CloudConfigSync;
+import de.aerialmace.config.ModConfig;
 import de.aerialmace.gui.Animation;
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleCategory;
+import de.aerialmace.module.setting.ActionSetting;
 import de.aerialmace.module.setting.BooleanSetting;
 import de.aerialmace.module.setting.KeybindSetting;
 import de.aerialmace.module.setting.ModeSetting;
@@ -33,11 +36,17 @@ public class ClientSettingsModule extends Module {
 	}
 
 	private final State state = new State();
+	private final ModConfig combatConfig;
 
 	public ClientSettingsModule() {
+		this(null);
+	}
+
+	public ClientSettingsModule(ModConfig combatConfig) {
 		super("Client Settings",
 				"Allgemeine Client-Einstellungen: GUI-Keybind, Skalierung, Animationen und Theme.",
 				ModuleCategory.MISC);
+		this.combatConfig = combatConfig;
 		// registerSettings() runs via ModuleManager.finishRegistration()
 		instance = this;
 	}
@@ -78,6 +87,18 @@ public class ClientSettingsModule extends Module {
 
 		addSetting(new BooleanSetting("Panel Borders", true,
 				value -> de.aerialmace.gui.ThemeManager.get().setShowBorders(value)));
+
+		if (combatConfig != null) {
+			addSetting(new BooleanSetting("Cloud Config Sync", combatConfig.cloudSyncEnabled,
+					value -> {
+						combatConfig.cloudSyncEnabled = value;
+						ModConfig.requestSave(combatConfig);
+					}));
+			addSetting(new ActionSetting("Sync Cloud Config", () -> CloudConfigSync.request(combatConfig)));
+			addSetting(new ActionSetting("Open Cloud Configs",
+					() -> net.minecraft.client.MinecraftClient.getInstance()
+							.setScreen(new de.aerialmace.config.CloudConfigsScreen(combatConfig))));
+		}
 
 		addSetting(new ModeSetting("Theme", List.of("Dark", "Midnight", "Neon", "Ocean", "Mono"), "Dark",
 				value -> {

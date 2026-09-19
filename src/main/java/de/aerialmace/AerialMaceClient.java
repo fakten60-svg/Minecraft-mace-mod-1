@@ -3,6 +3,8 @@ package de.aerialmace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.aerialmace.config.CloudConfigs;
+import de.aerialmace.config.CloudConfigSync;
 import de.aerialmace.config.ConfigManager;
 import de.aerialmace.config.ModConfig;
 import de.aerialmace.friend.FriendManager;
@@ -39,6 +41,8 @@ public class AerialMaceClient implements ClientModInitializer {
 	public static final String MOD_ID = "aerialmace";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	private static ModConfig activeConfig;
+
 	private ModConfig config;
 	private SequenceStateMachine stateMachine;
 	private ClientSettingsModule clientSettings;
@@ -46,8 +50,10 @@ public class AerialMaceClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		config = ModConfig.load();
+		activeConfig = config;
 		FriendManager.load();
 		stateMachine = new SequenceStateMachine(config);
+		CloudConfigSync.start(config);
 
 		// ---- Module registry ----------------------------------------------------
 		ModuleManager.register(new MaceSwitchModule(config)); // binds EXISTING combat logic
@@ -59,7 +65,7 @@ public class AerialMaceClient implements ClientModInitializer {
 		ModuleManager.register(new StepModule());
 		ModuleManager.register(new AutoGGModule());
 		ModuleManager.register(new NoRotateModule());
-		clientSettings = new ClientSettingsModule();
+		clientSettings = new ClientSettingsModule(config);
 		ModuleManager.register(clientSettings);
 		// -------------------------------------------------------------------------
 
@@ -81,8 +87,15 @@ public class AerialMaceClient implements ClientModInitializer {
 		for (var module : ModuleManager.getModules()) {
 			module.tick(client);
 		}
+		CloudConfigSync.poll(config);
+		CloudConfigs.poll(config);
 		ModConfig.flushPending();
 		stateMachine.tick(client);
+	}
+
+	/** Shared handle for screens that need the live combat config (cloud config sharing). */
+	public static ModConfig getConfig() {
+		return activeConfig;
 	}
 
 	public static void saveClientData() {
