@@ -127,13 +127,34 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 
 Kaputte oder fehlte Werte werden beim Start automatisch auf zulässige Bereiche korrigiert.
 
-## Steuerung
+## Steuerung & ClickGUI
 
 | Taste | Aktion |
 | --- | --- |
-| **M** (Standard, umbelegbar) | Automatisierung ein-/ausschalten |
+| **Right Shift** (Standard, änderbar) | ClickGUI öffnen/schließen |
+| **ESC** | ClickGUI schließen |
 
-Die Taste findet man unter *Optionen → Steuerung → Sonstiges*.
+### ClickGUI
+
+Die GUI öffnet sich mit **Right Shift** und zeigt vier Kategorien als frei bewegliche
+Panels: **Combat, Visuals, Movement, Misc**. Die Module werden automatisch aus dem
+ModuleManager geladen.
+
+- **Linksklick** auf ein Modul: ON/OFF (animiert)
+- **Rechtsklick** auf ein Modul: Settings ein-/ausklappen
+- **Random-Delays** (Initial/Equip/Attack) werden als **Range-Bar mit zwei Handles**
+  dargestellt – beide Punkte sind einzeln verschiebbar, Min < Max wird erzwungen, und die
+  Combat-Logik übernimmt die Werte sofort.
+- **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,
+  **ESC** setzt zurück auf **NONE**. Module haben standardmäßig **keinen** Keybind.
+- **Client-Settings-Panel**: GUI-Keybind, GUI-Scale, Animation Speed, Blur, Click Sounds,
+  Theme (Dark/Midnight/Mono), Color Picker für Accent/Background/Panel/Text-Farben sowie
+  Reset-Aktionen (Module Settings, Keybinds, Theme, GUI Layout).
+- Panels lassen sich per Drag & Drop verschieben (Header), scrollen bei Überlauf,
+  und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
+
+Die GUI schreibt ausschließlich in die bestehende `config/aerialmace.json` (Modul-Sidebar
+`MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte.
 
 ## Technik
 

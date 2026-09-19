@@ -1,26 +1,36 @@
 package de.aerialmace;
 
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.aerialmace.config.ConfigManager;
 import de.aerialmace.config.ModConfig;
+import de.aerialmace.gui.Animation;
+import de.aerialmace.input.KeybindManager;
+import de.aerialmace.module.ModuleManager;
+import de.aerialmace.module.modules.AutoGGModule;
+import de.aerialmace.module.modules.ClientSettingsModule;
+import de.aerialmace.module.modules.ESPModule;
+import de.aerialmace.module.modules.FullbrightModule;
+import de.aerialmace.module.modules.HUDModule;
+import de.aerialmace.module.modules.MaceSwitchModule;
+import de.aerialmace.module.modules.NoRotateModule;
+import de.aerialmace.module.modules.SpeedModule;
+import de.aerialmace.module.modules.SprintModule;
+import de.aerialmace.module.modules.StepModule;
 import de.aerialmace.sequence.SequenceStateMachine;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
 
 /**
- * Client entrypoint: loads the config, registers the toggle key binding and drives the
- * sequence state machine once per client tick. The machine is also reset whenever the
- * client disconnects from a world/server.
+ * Client entrypoint. Wires the module system onto the existing combat module and
+ * registers the per-tick keybind handling. The combat logic
+ * ({@link SequenceStateMachine}, {@link TargetSelector}) is NOT touched by the GUI —
+ * it only reads {@link ModConfig}, which the module adapter writes.
  */
 public class AerialMaceClient implements ClientModInitializer {
 
@@ -29,18 +39,28 @@ public class AerialMaceClient implements ClientModInitializer {
 
 	private ModConfig config;
 	private SequenceStateMachine stateMachine;
-	private KeyBinding toggleKey;
+	private ClientSettingsModule clientSettings;
 
 	@Override
 	public void onInitializeClient() {
 		config = ModConfig.load();
 		stateMachine = new SequenceStateMachine(config);
 
-		toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.aerialmace.toggle",
-				InputUtil.Type.KEYSYM,
-				GLFW.GLFW_KEY_M,
-				KeyBinding.Category.MISC));
+		// ---- Module registry ----------------------------------------------------
+		ModuleManager.register(new MaceSwitchModule(config)); // binds EXISTING combat logic
+		ModuleManager.register(new ESPModule());
+		ModuleManager.register(new FullbrightModule());
+		ModuleManager.register(new HUDModule());
+		ModuleManager.register(new SprintModule());
+		ModuleManager.register(new SpeedModule());
+		ModuleManager.register(new StepModule());
+		ModuleManager.register(new AutoGGModule());
+		ModuleManager.register(new NoRotateModule());
+		clientSettings = new ClientSettingsModule();
+		ModuleManager.register(clientSettings);
+		// -------------------------------------------------------------------------
+
+		ConfigManager.load(ConfigManager.newPanelPositionMap());
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> stateMachine.reset());
@@ -49,22 +69,8 @@ public class AerialMaceClient implements ClientModInitializer {
 	}
 
 	private void onEndClientTick(MinecraftClient client) {
-		while (toggleKey.wasPressed()) {
-			config.enabled = !config.enabled;
-			ModConfig.save(config);
-			if (!config.enabled) {
-				stateMachine.reset();
-			}
-			showToggleMessage(client, config.enabled);
-		}
+		KeybindManager.tick(client, clientSettings.getState().guiKey);
 		stateMachine.tick(client);
 	}
 
-	private void showToggleMessage(MinecraftClient client, boolean enabled) {
-		if (client.player != null) {
-			client.player.sendMessage(Text.literal(enabled
-					? "§b[AerialMace] §fAutomatisierung §aaktiviert"
-					: "§b[AerialMace] §fAutomatisierung §cdeaktiviert"), true);
-		}
-	}
 }
