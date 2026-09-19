@@ -134,7 +134,12 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
   "maceToAttackDelayMax": 90,
   "postAttackDelayMin": 0,
   "postAttackDelayMax": 0,
-  "overlayMessages": true
+  "overlayMessages": true,
+  "cloudSyncEnabled": false,
+  "cloudConfigUrl": "",
+  "cloudShareUrl": "",
+  "cloudShareKey": "",
+  "cloudAuthor": ""
 }
 ```
 
@@ -152,6 +157,11 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 | `maceToAttackDelayMin/Max` | Delay zwischen Mace-Wechsel und Angriff (ms, inklusive) |
 | `postAttackDelayMin/Max` | Cooldown nach dem Angriff vor dem nächsten Durchlauf (ms, Standard 0) |
 | `overlayMessages` | Statusmeldungen über der Hotbar anzeigen |
+| `cloudSyncEnabled` | opt-in read-only URL-Config-Sync aktivieren |
+| `cloudConfigUrl` | HTTPS-URL zu einer öffentlichen JSON-Config; niemals Tokens eintragen |
+| `cloudShareUrl` | Supabase Project URL für die geteilten Cloud-Configs |
+| `cloudShareKey` | öffentlicher Supabase anon key (kein Service-Key) |
+| `cloudAuthor` | Anzeigename beim Hochladen einer Cloud-Config |
 
 Kaputte oder fehlte Werte werden beim Start automatisch auf zulässige Bereiche korrigiert.
 
@@ -176,6 +186,7 @@ ModuleManager geladen.
 - **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,
   **ESC** setzt zurück auf **NONE**. Module haben standardmäßig **keinen** Keybind.
 - **Client-Settings-Panel**: GUI-Keybind, GUI-Scale, Animation Speed, Blur, Click Sounds,
+  Cloud Config Sync und manueller Sync-Button,
   Search Bar, Panel Borders und Theme (Dark/Midnight/Neon/Ocean/Mono). Der Color Picker bietet
   Accent-, Background-, Panel-, Active-, Text-, Secondary-Text-, Border- und Hover-Farben sowie
   Reset-Aktionen (Module Settings, Keybinds, Theme, GUI Layout).
@@ -183,7 +194,7 @@ ModuleManager geladen.
   und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
 - Globale Suche: Im ClickGUI direkt tippen, um Module nach Name/Beschreibung zu filtern; ein rotes `!`
   markiert doppelte Modul-Keybinds.
-- **F6** öffnet den Profil-Manager (Profile erstellen/speichern/laden/löschen), **F7** den Friends-Manager
+- **F9** öffnet den Cloud-Config-Browser (Configs hochladen, suchen und laden). **F6** öffnet den Profil-Manager (Profile erstellen/speichern/laden/löschen), **F7** den Friends-Manager
   (Name eingeben, Enter zum Hinzufügen, `F` zum Filtern, `[remove]` zum Löschen), **F8** den separaten HUD-Editor.
   HUD-Elemente für Watermark, FPS, Koordinaten und aktive Module werden unabhängig vom ClickGUI gerendert
   und ihre Positionen/Sichtbarkeit/Skalierung unter `config/aerialmace-hud.json` gespeichert.
@@ -219,6 +230,51 @@ de.aerialmace
 Die Sequenz ist vollständig **nicht-blockierend** implementiert: Delays werden als Deadline
 gespeichert und im Client-Tick geprüft – es gibt nirgends `Thread.sleep()`. Aktionen laufen im
 selben Tick, in dem die Delay-Deadline abläuft, damit das konfigurierte Timing exakt bleibt.
+
+## Cloud-Configs
+
+Cloud-Configs sind für die **Client-Konfigurationen** gedacht: Jeder kann seine aktuelle
+Client-Config hochladen und die Configs anderer Spieler direkt im Spiel durchsuchen und laden.
+Releases laufen davon unabhängig weiter wie bisher.
+
+### Einrichtung (einmalig, für den Betreiber)
+
+1. Projekt bei Supabase anlegen.
+2. SQL aus [`docs/supabase-cloud-configs.sql`](docs/supabase-cloud-configs.sql) im SQL-Editor ausführen.
+   Das legt die Tabelle `aerialmace_configs` und die Policies an: anonymes Lesen und anonymes
+   Hochladen erlaubt, Ändern und Löschen nicht.
+3. Project URL und den öffentlichen **anon key** notieren.
+
+### Nutzung (im Spiel)
+
+**F9** (oder `Client Settings → Open Cloud Configs`) öffnet den Cloud-Config-Browser:
+
+- `Share URL` – Project URL des Supabase-Projekts
+- `Anon Key` – öffentlicher anon key (kein Service-Key, kein Passwort)
+- `Author` – Name, der beim Upload angezeigt wird
+- `Upload Name` – Name des Eintrags
+
+Mit **TAB** wechselst du das Feld, **ENTER** lädt die aktuelle Config hoch, ein Klick auf eine Zeile
+lädt die jeweilige Cloud-Config herunter und übernimmt sie sofort. **R** aktualisiert die Liste.
+
+### Sicherheit
+
+- Nur der öffentliche anon key wird verwendet; der Client enthält keine privaten Schlüssel.
+- Es wird nichts hochgeladen, ohne dass du ENTER drückst.
+- Beim Upload werden nur Gameplay-Werte geteilt. URLs, Keys und Cloud-Schalter bleiben lokal.
+- Heruntergeladene Configs können die Cloud-Einstellungen nicht verändern (kein Redirect).
+- Nur HTTPS, begrenzte Antwortgröße, alles asynchron, Offline-Betrieb bleibt möglich.
+
+### Zusätzlicher URL-Sync
+
+Zusätzlich gibt es einen einfachen read-only Sync: `cloudSyncEnabled: true` plus eine HTTPS-URL in
+`cloudConfigUrl` liest beim Start ein JSON-Objekt und übernimmt daraus nur die enthaltenen Felder.
+
+## Releases
+
+Releases sind unabhängig von den Cloud-Configs und laufen weiterhin über Version-Tags. Ein Tag nach
+Schema `v*` (zum Beispiel `v1.1.0`) löst `.github/workflows/release.yml` aus: Die Mod wird mit Java 21
+gebaut und die kompilierte JAR automatisch an den GitHub Release angehängt.
 
 ## Release und Qualitätssicherung
 

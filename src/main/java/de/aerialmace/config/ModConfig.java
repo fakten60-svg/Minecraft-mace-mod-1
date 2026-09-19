@@ -75,6 +75,18 @@ public final class ModConfig {
 	/** Shows short status messages above the hotbar. */
 	public boolean overlayMessages = true;
 
+	/** Optional read-only cloud config sync; disabled by default for offline-first behavior. */
+	public boolean cloudSyncEnabled = false;
+	/** HTTPS URL to a JSON object containing only the settings that should be overridden. */
+	public String cloudConfigUrl = "";
+
+	/** Supabase project URL used by the shared cloud configs (client config sharing). */
+	public String cloudShareUrl = "";
+	/** Public Supabase anon key. Safe to ship; protected by row level security policies. */
+	public String cloudShareKey = "";
+	/** Display name shown next to uploaded cloud configs. */
+	public String cloudAuthor = "";
+
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static ModConfig pendingSave;
 	private static long lastSaveAt;
@@ -157,5 +169,47 @@ public final class ModConfig {
 
 	private static int clamp(int value, int min, int max) {
 		return Math.max(min, Math.min(max, value));
+	}
+
+	/** Copies cloud-resolved values into the live config without replacing the object reference. */
+	public void copyFrom(ModConfig other) {
+		this.enabled = other.enabled;
+		this.requireSneaking = other.requireSneaking;
+		this.ignoreFriends = other.ignoreFriends;
+		this.targetHeightMin = other.targetHeightMin;
+		this.targetHeightMax = other.targetHeightMax;
+		this.maxTargetDistance = other.maxTargetDistance;
+		this.maxHorizontalDistance = other.maxHorizontalDistance;
+		this.targetLockDelayMin = other.targetLockDelayMin;
+		this.targetLockDelayMax = other.targetLockDelayMax;
+		this.initialDelayMin = other.initialDelayMin;
+		this.initialDelayMax = other.initialDelayMax;
+		this.equipToMaceDelayMin = other.equipToMaceDelayMin;
+		this.equipToMaceDelayMax = other.equipToMaceDelayMax;
+		this.maceToAttackDelayMin = other.maceToAttackDelayMin;
+		this.maceToAttackDelayMax = other.maceToAttackDelayMax;
+		this.postAttackDelayMin = other.postAttackDelayMin;
+		this.postAttackDelayMax = other.postAttackDelayMax;
+		this.overlayMessages = other.overlayMessages;
+		this.cloudSyncEnabled = other.cloudSyncEnabled;
+		this.cloudConfigUrl = other.cloudConfigUrl;
+		this.cloudShareUrl = other.cloudShareUrl;
+		this.cloudShareKey = other.cloudShareKey;
+		this.cloudAuthor = other.cloudAuthor;
+	}
+
+	/**
+	 * Snapshot used for cloud uploads. Only gameplay tuning is shared; credentials, remote
+	 * endpoints, and the local sharing configuration stay on this machine.
+	 */
+	public ModConfig sanitizedForSharing() {
+		ModConfig copy = new ModConfig();
+		copy.copyFrom(this);
+		copy.cloudSyncEnabled = false;
+		copy.cloudConfigUrl = "";
+		copy.cloudShareUrl = "";
+		copy.cloudShareKey = "";
+		copy.cloudAuthor = "";
+		return copy;
 	}
 }
