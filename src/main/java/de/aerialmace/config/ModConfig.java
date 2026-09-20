@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Simple JSON configuration for the Aerial Mace Automation mod.
+ * Simple JSON configuration for the Gugugaga Client mod.
  *
  * <p>The file is stored at {@code config/aerialmace.json}. It is created with defaults on the
  * first start and rewritten whenever it is missing or unreadable, so a broken file can never
@@ -24,6 +24,12 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class ModConfig {
 	public static final String CONFIG_FILE_NAME = "aerialmace.json";
+
+	/**
+	 * The user-facing client name (watermark, window titles, overlay messages). Changed here
+	 * so the branding has a single source of truth.
+	 */
+	public static final String CLIENT_NAME = "Gugugaga Client";
 
 	// ------------------------------------------------------------------
 	// Feature toggles

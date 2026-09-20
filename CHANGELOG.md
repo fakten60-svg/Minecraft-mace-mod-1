@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Cloud-config hardening on the Supabase side: upload throttle (max 5 uploads per author per minute) and an automatic retention trigger that keeps only the newest 500 rows, so the shared table stays bounded (~16 MB) and fits the free tier forever.
+- Client-side abuse protection for cloud configs: upload name/author are sanitized and length-limited, every displayed entry string is truncated to 48 characters, and the download parser has a defense-in-depth guard against deeply nested hostile JSON.
+
 ### Fixed
 
 - A corrupt `aerialmace-gui.json` no longer throws while loading: unknown keys are ignored, wrong types are skipped, and one broken entry cannot abort the whole load.
@@ -33,6 +38,7 @@
 
 ### Changed
 
+- Renamed the user-facing client to **Gugugaga Client** (watermark, ClickGUI/HUD editor window titles, overlay messages and the mod display name). The mod id, package and config file paths stay unchanged so existing configs keep working; the name now comes from a single `ModConfig.CLIENT_NAME` constant.
 - "Reset GUI Layout" also resets HUD positions; "Reset Everything" requires a confirmation click and no longer deletes the friend list.
 - Module keybinds take precedence over the reserved F6-F9 editor shortcuts.
 - HUD gained a Speed element plus per-element settings (scale, color, label, decimals, unit) and a full editor (visibility, scale, color, rename, reset).

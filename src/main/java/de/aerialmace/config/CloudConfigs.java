@@ -29,8 +29,17 @@ import com.google.gson.JsonObject;
  *
  * <p>Every call is asynchronous; results land in fields the client thread polls, so the game
  * never blocks on the network and offline play keeps working.
+ *
+ * <p>Abuse resistance: only JSON travels over the wire (never archives, so classic zip bombs
+ * do not apply), responses are rejected above {@link #MAX_BODY_BYTES}, Minecraft's Gson enforces
+ * a nesting limit (deeply nested "JSON bombs" cannot recurse the parser), the SQL policies cap
+ * each row at 32 KB and throttle uploads, and every string parsed here is length-limited before
+ * it is ever rendered.
  */
 public final class CloudConfigs {
+
+    /** Maximum length for names/authors shown in the list; matches the SQL column checks. */
+    private static final int MAX_LABEL_CHARS = 48;
 
     /** One shared config as listed by the cloud table. */
     public record Entry(long id, String name, String author, String createdAt) {
@@ -100,14 +109,12 @@ public final class CloudConfigs {
         if (!requireConfigured(config) || status == Status.BUSY) {
             return;
         }
-        String trimmed = name == null ? "" : name.trim();
-        String safeName = trimmed.isBlank() ? "unnamed"
-                : trimmed.substring(0, Math.min(48, trimmed.length()));
+        String safeName = sanitizeLabel(name, "unnamed");
         setStatus(Status.BUSY, "Uploading config...");
 
         JsonObject payload = new JsonObject();
         payload.addProperty("name", safeName);
-        payload.addProperty("author", config.cloudAuthor == null ? "" : config.cloudAuthor);
+        payload.addProperty("author", sanitizeLabel(config.cloudAuthor, ""));
         payload.add("config", GSON.toJsonTree(config.sanitizedForSharing()));
 
         send(config, request(config, "POST", "/rest/v1/" + TABLE, GSON.toJson(payload)))
@@ -229,12 +236,14 @@ public final class CloudConfigs {
                 JsonObject object = element.getAsJsonObject();
                 result.add(new Entry(
                         object.has("id") && !object.get("id").isJsonNull() ? object.get("id").getAsLong() : 0L,
-                        object.has("name") && !object.get("name").isJsonNull() ? object.get("name").getAsString() : "unnamed",
-                        object.has("author") && !object.get("author").isJsonNull() ? object.get("author").getAsString() : "",
-                        object.has("created_at") && !object.get("created_at").isJsonNull() ? object.get("created_at").getAsString() : ""));
+                        object.has("name") && !object.get("name").isJsonNull() ? sanitizeLabel(object.get("name").getAsString(), "unnamed") : "unnamed",
+                        object.has("author") && !object.get("author").isJsonNull() ? sanitizeLabel(object.get("author").getAsString(), "") : "",
+                        object.has("created_at") && !object.get("created_at").isJsonNull() ? sanitizeLabel(object.get("created_at").getAsString(), "") : ""));
             }
-        } catch (RuntimeException ignored) {
-            // malformed response -> keep whatever we had
+        } catch (RuntimeException | StackOverflowError ignored) {
+            // Malformed or hostile response -> keep whatever we had. The stack-overflow guard
+            // is defense in depth: Gson's reader has a nesting limit, but a hand-tuned runtime
+            // must never take the whole client down over a malicious payload.
         }
         return result;
     }
@@ -267,9 +276,27 @@ public final class CloudConfigs {
                 result.normalize();
             }
             return result;
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException | StackOverflowError ignored) {
+            // Malformed or hostile payload: refuse to apply instead of crashing the client.
             return null;
         }
+    }
+
+    /**
+     * Strips control characters and limits a user-visible string so a hostile or
+     * misconfigured table entry can never flood the screen or the upload payload.
+     */
+    private static String sanitizeLabel(String value, String fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        StringBuilder cleaned = new StringBuilder(Math.min(value.length(), MAX_LABEL_CHARS));
+        value.codePoints()
+                .filter(cp -> cp >= 0x20 && cp != 0x7F)
+                .limit(MAX_LABEL_CHARS)
+                .forEach(cleaned::appendCodePoint);
+        String result = cleaned.toString().trim();
+        return result.isBlank() ? fallback : result;
     }
 
     public static boolean isHttpsUrl(String value) {
