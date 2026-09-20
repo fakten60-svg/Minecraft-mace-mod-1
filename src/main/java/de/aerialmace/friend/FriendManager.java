@@ -85,6 +85,7 @@ public final class FriendManager {
 	public static void save() {
 		try {
 			Files.createDirectories(FILE.getParent());
+			de.aerialmace.config.ConfigManager.copyToBackup(FILE, FILE.resolveSibling(FILE.getFileName() + ".bak"));
 			JsonArray array = new JsonArray();
 			for (Friend friend : FRIENDS.values()) {
 				JsonObject object = new JsonObject();
@@ -95,7 +96,8 @@ public final class FriendManager {
 			try (Writer writer = Files.newBufferedWriter(FILE)) {
 				GSON.toJson(array, writer);
 			}
-		} catch (IOException ignored) {
+		} catch (IOException e) {
+			de.aerialmace.debug.ClientLogger.warn("Could not save friends", e);
 		}
 	}
 

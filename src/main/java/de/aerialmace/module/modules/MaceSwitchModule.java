@@ -75,34 +75,39 @@ public class MaceSwitchModule extends Module {
 				(min, max) -> {
 					config.targetLockDelayMin = min;
 					config.targetLockDelayMax = max;
-				});
+				})
+				.describe("Extra settling time after a target is locked (ms).");
 
 		initialDelay = addRange("Initial Delay", 40, 400,
 				DEFAULT_INITIAL_DELAY_MIN, DEFAULT_INITIAL_DELAY_MAX,
 				(min, max) -> {
 					config.initialDelayMin = min;
 					config.initialDelayMax = max;
-				});
+				})
+				.describe("Random delay before the chestplate is equipped.");
 
 		equipDelay = addRange("Equip Delay", 40, 400,
 				DEFAULT_EQUIP_DELAY_MIN, DEFAULT_EQUIP_DELAY_MAX,
 				(min, max) -> {
 					config.equipToMaceDelayMin = min;
 					config.equipToMaceDelayMax = max;
-				});
+				})
+				.describe("Delay between equipping and the mace switch.");
 
 		attackDelay = addRange("Attack Delay", 40, 400,
 				DEFAULT_ATTACK_DELAY_MIN, DEFAULT_ATTACK_DELAY_MAX,
 				(min, max) -> {
 					config.maceToAttackDelayMin = min;
 					config.maceToAttackDelayMax = max;
-				});
+				})
+				.describe("Delay between the mace switch and the attack.");
 
 		postAttackDelay = addRange("Post-Attack Cooldown", 0, 500, 0, 0,
 				(min, max) -> {
 					config.postAttackDelayMin = min;
 					config.postAttackDelayMax = max;
-				});
+				})
+				.describe("Cooldown after an attack before the next sequence.");
 
 		// --------------------------------------------------------------
 		// Targeting: height (center) and tolerance both write the two config
@@ -115,18 +120,21 @@ public class MaceSwitchModule extends Module {
 					double tolerance = currentTolerance();
 					config.targetHeightMin = Math.max(0.0, value - tolerance);
 					config.targetHeightMax = value + tolerance;
-				});
+				})
+				.describe("Center of the accepted height window (playerY - targetY).");
 
 		targetTolerance = addSlider("Target Tolerance", "blocks", 0.05, 2.0, DEFAULT_TARGET_TOLERANCE, 0.05,
 				value -> {
 					double center = currentTargetHeight();
 					config.targetHeightMin = Math.max(0.0, center - value);
 					config.targetHeightMax = center + value;
-				});
+				})
+				.describe("Half-width of the accepted height window.");
 
 		maxHorizontalDistance = addSlider("Max Horizontal Distance", "blocks", 0.5, 32.0,
 				config.maxHorizontalDistance, 0.5,
-				value -> config.maxHorizontalDistance = Math.max(0.5, value));
+				value -> config.maxHorizontalDistance = Math.max(0.5, value))
+				.describe("Maximum horizontal distance to the target.");
 
 		maxDistance = addSlider("Max Distance", "blocks", 1.0, 32.0, config.maxTargetDistance, 0.5,
 				value -> {
@@ -136,19 +144,23 @@ public class MaceSwitchModule extends Module {
 						config.maxHorizontalDistance = value;
 						maxHorizontalDistance.setValue(value);
 					}
-				});
+				})
+				.describe("Maximum total distance to the target.");
 
 		// --------------------------------------------------------------
 		// Misc behavior switches bound to the existing config fields.
 		// --------------------------------------------------------------
 		ignoreFriends = addToggle("Ignore Friends", config.ignoreFriends,
-				value -> config.ignoreFriends = value);
+				value -> config.ignoreFriends = value)
+				.describe("Never target players on the friend list.");
 
 		requireSneaking = addToggle("Require Sneaking", config.requireSneaking,
-				value -> config.requireSneaking = value);
+				value -> config.requireSneaking = value)
+				.describe("Only start the sequence while sneaking.");
 
 		overlayMessages = addToggle("Overlay Messages", config.overlayMessages,
-				value -> config.overlayMessages = value);
+				value -> config.overlayMessages = value)
+				.describe("Show sequence status above the hotbar.");
 
 
 		// The stored config values win over the factory defaults.

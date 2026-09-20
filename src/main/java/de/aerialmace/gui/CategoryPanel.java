@@ -159,6 +159,29 @@ public class CategoryPanel {
 				&& mouseY >= y + renderOffsetY && mouseY <= y + renderOffsetY + HEADER_HEIGHT + visibleArea;
 	}
 
+	/**
+	 * The hovered setting for tooltips: expanded module settings first, then the panel's
+	 * own components (theme colors, reset actions). Null when nothing is hovered.
+	 */
+	public Setting findHoveredSetting(double mouseX, double mouseY) {
+		if (!isMouseOverPanel(mouseX, mouseY)) {
+			return null;
+		}
+		for (ModuleComponent module : modules) {
+			if (!visible(module)) continue;
+			Setting setting = module.findHoveredSetting(mouseX, mouseY);
+			if (setting != null) {
+				return setting;
+			}
+		}
+		for (SettingComponent component : directComponents) {
+			if (component.isHoveredAt(mouseX, mouseY)) {
+				return component.getSetting();
+			}
+		}
+		return null;
+	}
+
 	public void setFilter(String filter) {
 		this.filter = filter == null ? "" : filter;
 	}

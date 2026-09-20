@@ -41,4 +41,18 @@ public final class ModuleManager {
 		return false;
 	}
 
+	/** All other modules bound to the same key; empty when the key is NONE or unique. */
+	public static List<Module> getConflictingModules(int keyCode) {
+		List<Module> conflicts = new ArrayList<>();
+		if (keyCode == de.aerialmace.module.setting.KeybindSetting.NONE) {
+			return conflicts;
+		}
+		for (Module module : MODULES) {
+			if (!module.getKeybind().isNone() && module.getKeybind().getKey() == keyCode) {
+				conflicts.add(module);
+			}
+		}
+		return conflicts;
+	}
+
 }

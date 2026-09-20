@@ -92,6 +92,10 @@ public final class KeybindManager {
 		}
 		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F9)) {
 			client.setScreen(new CloudConfigsScreen(de.aerialmace.AerialMaceClient.getConfig()));
+			return;
+		}
+		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F10)) {
+			de.aerialmace.debug.DebugOverlay.toggle();
 		}
 	}
 

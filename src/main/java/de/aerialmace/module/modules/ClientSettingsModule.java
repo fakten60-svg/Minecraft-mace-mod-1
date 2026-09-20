@@ -31,6 +31,7 @@ public class ClientSettingsModule extends Module {
 		public boolean blur = true;
 		public boolean clickSounds = true;
 		public boolean showSearch = true;
+		public boolean debugOverlay = false;
 		public String theme = "Dark";
 	}
 
@@ -72,19 +73,29 @@ public class ClientSettingsModule extends Module {
 		});
 
 		addSetting(new SliderSetting("GUI Scale", "x", 0.75, 2.0, 1.0, 0.05,
-				(value, unused) -> state.guiScale = value));
+				(value, unused) -> state.guiScale = value))
+				.describe("Scales the whole ClickGUI (top-left anchored).");
 
 		addSetting(new SliderSetting("Animation Speed", "x", 0.25, 3.0, 1.0, 0.05,
 				(value, unused) -> {
 					state.animationSpeed = value;
 					Animation.setGlobalSpeed(value.floatValue());
-				}));
+				}))
+				.describe("Speed of all GUI and notification animations.");
 
-		addSetting(new BooleanSetting("Blur", true, value -> state.blur = value));
+		addSetting(new BooleanSetting("Blur", true, value -> state.blur = value))
+				.describe("Blurs the world behind the ClickGUI.");
 
-		addSetting(new BooleanSetting("Click Sounds", true, value -> state.clickSounds = value));
+		addSetting(new BooleanSetting("Click Sounds", true, value -> state.clickSounds = value))
+				.describe("Play a sound on GUI interactions.");
 
-		addSetting(new BooleanSetting("Show Search Bar", true, value -> state.showSearch = value));
+		addSetting(new BooleanSetting("Show Search Bar", true, value -> state.showSearch = value))
+				.describe("Show the module search bar inside the ClickGUI.");
+
+		addSetting(new BooleanSetting("Debug Overlay", false, value -> {
+			state.debugOverlay = value;
+			de.aerialmace.debug.DebugOverlay.setVisible(value);
+		})).describe("Diagnostics overlay (also F10): FPS, versions, config state.");
 
 		addSetting(new BooleanSetting("Panel Borders", true,
 				value -> de.aerialmace.gui.ThemeManager.get().setShowBorders(value)));

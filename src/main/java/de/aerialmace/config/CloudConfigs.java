@@ -97,6 +97,9 @@ public final class CloudConfigs {
                     List<Entry> parsed = parseEntries(response.body());
                     ENTRIES.set(parsed);
                     setStatus(Status.OK, parsed.size() + " cloud configs");
+                    de.aerialmace.notification.NotificationManager.notify(
+                            de.aerialmace.notification.NotificationType.INFO, "Cloud configs",
+                            parsed.size() + " configs loaded");
                 })
                 .exceptionally(error -> {
                     setStatus(Status.ERROR, "Cloud unavailable");
@@ -124,6 +127,8 @@ public final class CloudConfigs {
                         return;
                     }
                     setStatus(Status.OK, "Uploaded \"" + safeName + "\"");
+                    de.aerialmace.notification.NotificationManager.notify(
+                            de.aerialmace.notification.NotificationType.SUCCESS, "Config uploaded", safeName);
                     refresh(config);
                 })
                 .exceptionally(error -> {
@@ -148,10 +153,16 @@ public final class CloudConfigs {
                     ModConfig applied = parseDownload(response.body(), config);
                     if (applied == null) {
                         setStatus(Status.ERROR, "Config could not be read");
+                        de.aerialmace.notification.NotificationManager.notify(
+                                de.aerialmace.notification.NotificationType.ERROR, "Config invalid",
+                                "Cloud config could not be read");
                         return;
                     }
                     DOWNLOADED.set(applied);
                     setStatus(Status.OK, "Cloud config applied");
+                    de.aerialmace.notification.NotificationManager.notify(
+                            de.aerialmace.notification.NotificationType.SUCCESS, "Config applied",
+                            "The downloaded config is now active");
                 })
                 .exceptionally(error -> {
                     setStatus(Status.ERROR, "Download unavailable");

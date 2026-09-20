@@ -42,6 +42,7 @@ public class AerialMaceClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static ModConfig activeConfig;
+	private static SequenceStateMachine activeStateMachine;
 
 	private ModConfig config;
 	private SequenceStateMachine stateMachine;
@@ -53,6 +54,7 @@ public class AerialMaceClient implements ClientModInitializer {
 		activeConfig = config;
 		FriendManager.load();
 		stateMachine = new SequenceStateMachine(config);
+		activeStateMachine = stateMachine;
 
 		// ---- Module registry ----------------------------------------------------
 		ModuleManager.register(new MaceSwitchModule(config)); // binds EXISTING combat logic
@@ -70,6 +72,7 @@ public class AerialMaceClient implements ClientModInitializer {
 
 		ConfigManager.load(ConfigManager.newPanelPositionMap());
 		HudManager.initialize();
+		de.aerialmace.notification.NotificationManager.init();
 
 		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
@@ -103,6 +106,11 @@ public class AerialMaceClient implements ClientModInitializer {
 	/** Shared handle for screens that need the live combat config (cloud config sharing). */
 	public static ModConfig getConfig() {
 		return activeConfig;
+	}
+
+	/** Current phase of the combat state machine (debug overlay). */
+	public static SequenceStateMachine.State stateMachineState() {
+		return activeStateMachine != null ? activeStateMachine.getState() : SequenceStateMachine.State.IDLE;
 	}
 
 }

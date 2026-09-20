@@ -131,12 +131,42 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 			panel.update(deltaSeconds);
 			panel.render(context, (int) uiMouseX, (int) uiMouseY, deltaSeconds, eased);
 		}
+
+		renderSettingTooltip(context, uiMouseX, uiMouseY);
 		matrices.popMatrix();
 
 		if (needsSave) {
 			needsSave = false;
 			ConfigManager.save(collectPanelPositions());
 		}
+	}
+
+	/**
+	 * Draws the tooltip of the hovered setting (if it has a description) below the cursor,
+	 * clamped into the visible UI area. Rendered last so it sits above every panel.
+	 */
+	private void renderSettingTooltip(DrawContext context, double mouseX, double mouseY) {
+		Setting hovered = null;
+		for (CategoryPanel panel : panels) {
+			hovered = panel.findHoveredSetting(mouseX, mouseY);
+			if (hovered != null) {
+				break;
+			}
+		}
+		if (hovered == null || hovered.getDescription() == null) {
+			return;
+		}
+		var textRenderer = MinecraftClient.getInstance().textRenderer;
+		ThemeManager theme = ThemeManager.get();
+		String text = hovered.getDescription();
+		int textWidth = textRenderer.getWidth(text);
+		int uiWidth = Math.round(width / uiScale());
+		int uiHeight = Math.round(height / uiScale());
+		int boxX = (int) Math.min(mouseX + 8, uiWidth - textWidth - 14);
+		int boxY = (int) Math.min(mouseY + 12, uiHeight - 22);
+		context.fill(boxX, boxY, boxX + textWidth + 10, boxY + 15, theme.panel().getColor());
+		context.fill(boxX, boxY, boxX + 1, boxY + 15, theme.accent().getColor());
+		context.drawText(textRenderer, text, boxX + 5, boxY + 4, theme.text().getColor(), false);
 	}
 
 	/** Converts screen coords into scaled UI coords (top-left anchored). */

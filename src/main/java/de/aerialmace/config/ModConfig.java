@@ -24,6 +24,8 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class ModConfig {
 	public static final String CONFIG_FILE_NAME = "aerialmace.json";
+	/** Current config format version; older files keep working (see {@link #load()}). */
+	public static final int CONFIG_VERSION = 1;
 
 	/**
 	 * The user-facing client name (watermark, window titles, overlay messages). Changed here
@@ -97,6 +99,9 @@ public final class ModConfig {
 	/** Display name shown next to uploaded cloud configs. */
 	public String cloudAuthor = "";
 
+	/** Format version of the file this config was loaded from; rewritten on every save. */
+	public int configVersion = CONFIG_VERSION;
+
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static ModConfig pendingSave;
 	private static long lastSaveAt;
@@ -122,15 +127,29 @@ public final class ModConfig {
 		Path path = configPath();
 		ModConfig config = new ModConfig();
 		if (Files.exists(path)) {
+			// Keep one session backup of the existing file before it may be rewritten.
+			Path backup = path.resolveSibling(CONFIG_FILE_NAME + ".bak");
+			if (!Files.exists(backup)) {
+				ConfigManager.copyToBackup(path, backup);
+			}
 			try (Reader reader = Files.newBufferedReader(path)) {
 				ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
 				if (loaded != null) {
 					config = loaded;
 				}
 			} catch (IOException | RuntimeException e) {
-				// Unreadable/corrupt file: fall back to defaults and rewrite it below.
+				de.aerialmace.debug.ClientLogger.warn("Combat config unreadable; using defaults", e);
+				de.aerialmace.notification.NotificationManager.notify(
+						de.aerialmace.notification.NotificationType.WARNING, "Config problem",
+						"Combat config was reset to defaults");
 			}
 		}
+		if (config.configVersion > CONFIG_VERSION) {
+			de.aerialmace.debug.ClientLogger.warn("Combat config written by a newer client version ("
+					+ config.configVersion + " > " + CONFIG_VERSION + "); loading with defaults where unknown.");
+		}
+		// Migration hook for future format changes: transform config here, step by step.
+		config.configVersion = CONFIG_VERSION;
 		config.normalize();
 		save(config);
 		return config;
@@ -146,7 +165,8 @@ public final class ModConfig {
 				GSON.toJson(config, writer);
 			}
 		} catch (IOException e) {
-			// Ignore: the game must keep working even when the config cannot be written.
+			// Logged, but the game must keep working even when the config cannot be written.
+			de.aerialmace.debug.ClientLogger.warn("Could not save combat config", e);
 		}
 	}
 

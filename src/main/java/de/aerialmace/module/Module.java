@@ -44,8 +44,10 @@ public abstract class Module {
 	/** Subclasses add their settings here via {@link #addSetting(Setting)}. */
 	protected abstract void registerSettings();
 
-	protected final void addSetting(Setting setting) {
+	/** Registers a setting and returns it, so registrations can stay fluent. */
+	protected final <T extends Setting> T addSetting(T setting) {
 		settings.add(setting);
+		return setting;
 	}
 
 	public String getName() {
@@ -82,6 +84,9 @@ public abstract class Module {
 			for (Runnable listener : toggleListeners) {
 				listener.run();
 			}
+			// Decouple observers (e.g. notifications) via the event bus instead of letting
+			// them register directly against every module.
+			de.aerialmace.event.EventBus.post(new de.aerialmace.event.ModuleToggleEvent(this, value));
 		}
 	}
 

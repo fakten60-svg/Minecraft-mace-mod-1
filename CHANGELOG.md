@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Notification system (`de.aerialmace.notification`): INFO/SUCCESS/WARNING/ERROR toasts at the bottom right, animated FPS-independently with a capped queue. Wired to real events: module toggles (via the new event bus), profile save/load/rename/delete, cloud config actions, config load problems and keybind conflicts.
+- Typed event bus (`de.aerialmace.event`): small synchronous client-thread pub/sub used to decouple modules from observers (`ModuleToggleEvent`).
+- Debug overlay (**F10** or the "Debug Overlay" client setting): FPS, current screen, GUI scale, config dirty state, combat state machine phase, active modules plus real client/MC/Fabric versions from the loader metadata. Toggling it also enables debug logging.
+- Central `ClientLogger` with a debug gate; config/friend/HUD write failures and unreadable configs are now logged instead of silently swallowed, and the user sees a notification where it matters.
+- Config format versioning (`configVersion` in `aerialmace-gui.json` and `aerialmace.json`) with a separated migration hook; files from newer client versions are reported instead of silently misread.
+- Rotating config backups (`aerialmace-gui.json.bak.*`, max 3) plus session backups for the combat config and single `.bak` files for HUD layout and friends.
+- Profile rename (**R + name** in the profile manager) alongside create/save/load/delete.
+- Setting descriptions shown as tooltips in the ClickGUI (all MaceSwitch and Client Settings settings have real, short descriptions).
+
+### Changed
+
+- `Module.addSetting` now returns the setting so registrations can chain `.describe(...)`.
+- Keybind assignment warns via notification when the key is already bound to another module (the first-bound module still wins when polled).
+
 ## [1.1.1] - 2026-09-20
 
 ### Changed

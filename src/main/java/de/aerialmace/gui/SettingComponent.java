@@ -32,6 +32,16 @@ public abstract class SettingComponent {
 		this.width = width;
 	}
 
+	/** The setting this component edits (used for tooltips). */
+	public Setting getSetting() {
+		return setting;
+	}
+
+	/** True when the mouse is over this component's full row. */
+	public boolean isHoveredAt(double mouseX, double mouseY) {
+		return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + getHeight();
+	}
+
 	public abstract int getHeight();
 
 	/** Called once per frame with the real delta time (FPS-independent animations). */
