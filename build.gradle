@@ -19,6 +19,11 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+	// Unit tests for the pure client logic (delays, config, settings).
+	testImplementation platform("org.junit:junit-bom:5.11.4")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 processResources {
@@ -28,6 +33,10 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand "version": version
 	}
+}
+
+tasks.named("test", Test) {
+	useJUnitPlatform()
 }
 
 tasks.withType(JavaCompile).configureEach {
