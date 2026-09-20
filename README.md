@@ -6,344 +6,79 @@
 [![Build](https://github.com/fakten60-svg/Minecraft-mace-mod-1/actions/workflows/build.yml/badge.svg)](https://github.com/fakten60-svg/Minecraft-mace-mod-1/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/fakten60-svg/Minecraft-mace-mod-1?display_name=tag)](https://github.com/fakten60-svg/Minecraft-mace-mod-1/releases)
 
-Client-seitige Fabric-Mod für **Minecraft Java Edition 1.21.11**, die eine automatisierte
-Aerial-Mace-Sequenz ausführt, sobald sich der eigene Spieler **ungefähr 3 Blöcke über einem
-anderen Spieler** befindet.
+Client-seitige Fabric-Mod für **Minecraft 1.21.11**: Führt eine automatisierte Aerial-Mace-Sequenz
+aus, sobald du **ca. 3 Blöcke über einem anderen Spieler** bist — Chestplate ausrüsten, auf die
+Mace wechseln, angreifen. Alles über normale Client-Eingaben, mit zufälligen Delays.
 
-> ⚠️ **Fair-Play-Hinweis:** Automatisierte Abläufe verstoßen gegen die Serverregeln vieler
-> Multiplayer-Server. Diese Mod ist für Testumgebungen und eigene Server gedacht. Die Nutzung
-> erfolgt auf eigene Verantwortung.
-
----
-
-## Funktionsweise
-
-Sind alle Startbedingungen erfüllt, läuft folgende Sequenz ab:
-
-```
-IDLE
- ↓  (Ziel erkannt: Spieler ~3 Blöcke unterhalb, in Reichweite)
-TARGET_FOUND
- ↓  Target Lock Delay:   zufällig konfigurierbar (Standard 0 ms)
-TARGET_LOCK_DELAY
- ↓  Initial Delay:       zufällig 100–120 ms
-EQUIP_CHESTPLATE        (Item in der Hand via Vanilla-Inventarklick als Brustplatte ausrüsten)
- ↓  Equip → Mace Delay: zufällig 70–80 ms
-SWITCH_TO_MACE          (Hotbar-Slot mit einer Mace, wie ein normaler Hotbar-Wechsel)
- ↓  Mace → Attack Delay: zufällig 67–90 ms
-ATTACK                  (normaler Angriff: attackEntity + Swing, wie ein echter Linksklick)
- ↓  Post-Attack Cooldown: zufällig konfigurierbar (Standard 0 ms)
-POST_ATTACK_DELAY
- ↓
-IDLE
-```
-
-### Startbedingungen
-
-Die Sequenz startet nur, wenn **alle** Bedingungen erfüllt sind:
-
-- Der Client ist in einer Welt (Singleplayer oder Server) verbunden.
-- Der eigene Spieler lebt und ist nicht im Zuschauermodus.
-- Ein anderer Spieler wurde als Ziel erkannt.
-- Die vertikale Differenz `playerY - targetY` liegt im konfigurierbaren Fenster
-  (Standard: **2,85 – 3,25 Blöcke**, also „≈ 3 Blöcke“ mit Toleranz).
-- Das Ziel liegt innerhalb der konfigurierbaren Reichweite
-  (Standard: max. **5,5 Blöcke** gesamt / **4,5 Blöcke** horizontal).
-- Es läuft gerade keine Sequenz.
-
-### Abbruchbedingungen
-
-Die State Machine prüft vor **jedem** Übergang die Voraussetzungen neu und bricht sauber ab
-(Hotbar-Slot wird zurückgesetzt), wenn:
-
-- die Mod deaktiviert wird (im ClickGUI oder über den selbst zugewiesenen Keybind),
-- der Spieler stirbt, in den Zuschauermodus wechselt oder die Welt verlässt,
-- das Ziel verschwindet, stirbt oder das Höhen-/Distanzfenster verlässt,
-- keine Mace in der Hotbar liegt,
-- das getragene Handitem keine Brustplatte ist,
-- die Sequenz nach 5 Sekunden noch nicht abgeschlossen ist (Timeout).
-
-### „Wie normale Spielereingaben“
-
-Die Mod nutzt bewusst ausschließlich vorhandene Client-Mechanismen:
-
-| Aktion | Mechanismus |
-| --- | --- |
-| Chestplate ausrüsten | `ClientPlayerInteractionManager.clickSlot(...)` – dieselben Pakete wie ein Shift-Klick im Inventar |
-| Mace anwählen | `PlayerInventory.setSelectedSlot(...)` + `UpdateSelectedSlotC2SPacket` – identisch zum Scrollrad |
-| Angriff | `interactionManager.attackEntity(...)` + `player.swingHand(...)` – identisch zu einem echten Linksklick |
-
-Keine direkten Server-Zustandsänderungen, keine gepanzerten Interna – nur der reguläre
-Interaktionspfad des Clients.
-
----
+> ⚠️ **Fair-Play-Hinweis:** Automatisierung verstößt auf vielen Servern gegen die Regeln.
+> Nutzung auf eigene Verantwortung, gedacht für Testumgebungen und eigene Server.
 
 ## Vorschau
 
-Die folgenden Bilder zeigen die beabsichtigte Oberfläche des Clients. Sie sind bewusst als
-Illustrationen gekennzeichnet; Farben, Positionen, Maßstab und sichtbare Elemente können im Spiel
-konfiguriert werden.
+| ClickGUI | Modul-Settings | HUD-Editor |
+| --- | --- | --- |
+| ![ClickGUI](docs/screenshots/clickgui.svg) | ![Modul](docs/screenshots/module.svg) | ![HUD-Editor](docs/screenshots/hud-editor.svg) |
 
-### ClickGUI
+## Features
 
-![Gugugaga Client ClickGUI](docs/screenshots/clickgui.svg)
+- **Aerial-Mace-Sequenz** als nicht-blockierende State Machine mit zufälligen Delays
+  (Initial 100–120 ms, Equip → Mace 70–80 ms, Mace → Attack 67–90 ms, alle frei einstellbar)
+- **ClickGUI** (**Right Shift**) mit Panels, Zwei-Handles-Range-Bars, Slidern, Themes,
+  Color Picker, Suche und Keybinds (Module standardmäßig auf NONE)
+- **HUD** mit Watermark, FPS, Koordinaten, Speed und aktiven Modulen — frei positionierbar
+  über den **HUD-Editor (F8)**
+- **Profile (F6)**, **Friends (F7)**, **Cloud-Configs (F9)**
+- Alles wird persistent gespeichert; kaputte Configs können den Client nicht crashen
 
-### HUD-Editor und Overlay
+## Funktionsweise
 
-![Gugugaga Client HUD Editor](docs/screenshots/hud-editor.svg)
-
-## Installation (für Spieler)
-
-1. [Fabric Loader](https://fabricmc.net/use/installer/) für 1.21.11 installieren.
-2. [Fabric API](https://modrinth.com/mod/fabric-api) herunterladen und in den `mods`-Ordner legen.
-3. Die Mod-JAR aus den [Releases](../../releases) (oder selbst gebaut: `build/libs/`) in den
-   `mods`-Ordner legen.
-4. Minecraft mit dem Fabric-Profil für 1.21.11 starten.
-
-## Selbst bauen
-
-Voraussetzungen: **JDK 21**
-
-```bash
-./gradlew build
+```
+IDLE → TARGET_FOUND → Initial Delay → EQUIP_CHESTPLATE → Equip Delay
+     → SWITCH_TO_MACE → Mace Delay → ATTACK → Post-Attack Cooldown → IDLE
 ```
 
-Die fertige Mod liegt danach unter `build/libs/aerial-mace-automation-<version>.jar`
-(die `-sources.jar` ist nur für Entwickler).
+Start nur, wenn du lebst, ein anderes Spieler-Ziel existiert, `playerY - targetY` im
+Toleranzfenster (Standard 2,85–3,25) liegt und das Ziel in Reichweite ist. Vor jedem
+Übergang wird neu geprüft und bei Ungültigkeit sauber abgebrochen.
 
-## Konfiguration
+## Installation
 
-Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
+1. [Fabric Loader](https://fabricmc.net/use/installer/) für 1.21.11 installieren
+2. [Fabric API](https://modrinth.com/mod/fabric-api) in den `mods`-Ordner
+3. Mod-JAR aus den [Releases](../../releases) in den `mods`-Ordner
+4. Minecraft mit dem Fabric-Profil für 1.21.11 starten
 
-```json
-{
-  "enabled": true,
-  "requireSneaking": false,
-  "ignoreFriends": true,
-  "targetHeightMin": 2.85,
-  "targetHeightMax": 3.25,
-  "maxTargetDistance": 5.5,
-  "maxHorizontalDistance": 4.5,
-  "targetLockDelayMin": 0,
-  "targetLockDelayMax": 0,
-  "initialDelayMin": 100,
-  "initialDelayMax": 120,
-  "equipToMaceDelayMin": 70,
-  "equipToMaceDelayMax": 80,
-  "maceToAttackDelayMin": 67,
-  "maceToAttackDelayMax": 90,
-  "postAttackDelayMin": 0,
-  "postAttackDelayMax": 0,
-  "overlayMessages": true,
-  "cloudShareUrl": "",
-  "cloudShareKey": "",
-  "cloudAuthor": ""
-}
-```
+Selbst bauen: `./gradlew build` (JDK 21), JAR liegt unter `build/libs/`.
 
-| Schlüssel | Bedeutung |
-| --- | --- |
-| `enabled` | Master-Schalter (im ClickGUI oder über einen selbst zugewiesenen Keybind umschaltbar) |
-| `requireSneaking` | Sequenz nur starten, während gesneakt wird |
-| `ignoreFriends` | Friends aus der Zielauswahl ausschließen (Standard: true) |
-| `targetHeightMin/Max` | Toleranzfenster für `playerY - targetY` (Standard ≈ 3 Blöcke) |
-| `maxTargetDistance` | maximale Gesamt-Distanz zum Ziel |
-| `maxHorizontalDistance` | maximale horizontale Distanz zum Ziel |
-| `targetLockDelayMin/Max` | zusätzlicher Delay nach Zielerkennung zum Stabilisieren (ms, Standard 0) |
-| `initialDelayMin/Max` | Delay vor dem Ausrüsten (ms, inklusive) |
-| `equipToMaceDelayMin/Max` | Delay zwischen Ausrüsten und Mace-Wechsel (ms, inklusive) |
-| `maceToAttackDelayMin/Max` | Delay zwischen Mace-Wechsel und Angriff (ms, inklusive) |
-| `postAttackDelayMin/Max` | Cooldown nach dem Angriff vor dem nächsten Durchlauf (ms, Standard 0) |
-| `overlayMessages` | Statusmeldungen über der Hotbar anzeigen |
-| `cloudShareUrl` | Supabase Project URL für die geteilten Cloud-Configs |
-| `cloudShareKey` | öffentlicher Supabase anon key (kein Service-Key) |
-| `cloudAuthor` | Anzeigename beim Hochladen einer Cloud-Config |
-
-Kaputte oder fehlende Werte werden beim Start automatisch auf zulässige Bereiche korrigiert. Eine
-beschädigte oder handeditierte GUI-Config (`aerialmace-gui.json`) kann den Client nicht crashen:
-unbekannte Keys werden ignoriert, falsch typisierte Werte übersprungen und fehlende Einstellungen mit
-ihren Defaults ergänzt.
-
-## Steuerung & ClickGUI
+## Steuerung
 
 | Taste | Aktion |
 | --- | --- |
-| **Right Shift** (Standard, änderbar) | ClickGUI öffnen/schließen |
-| **ESC** | ClickGUI schließen |
-
-### ClickGUI
-
-Die GUI öffnet sich mit **Right Shift** und zeigt vier Kategorien als frei bewegliche
-Panels: **Combat, Visuals, Movement, Misc**. Die Module werden automatisch aus dem
-ModuleManager geladen.
-
-- **Linksklick** auf ein Modul: ON/OFF (animiert)
-- **Rechtsklick** auf ein Modul: Settings ein-/ausklappen
-- **Random-Delays** (Target Lock/Initial/Equip/Attack/Post-Attack) werden als **Range-Bar mit zwei Handles**
-  dargestellt – beide Punkte sind einzeln verschiebbar, Min < Max wird erzwungen, und die
-  Combat-Logik übernimmt die Werte sofort. Werte außerhalb der GUI-Grenzen (z. B. aus einer
-  handeditierten oder alten Config) werden beim Start sauber in den erlaubten Bereich gezogen,
-  statt die Handles aus der Bar zu schieben.
-- **Zielauswahl** über die Slider *Target Height* (Mitte), *Target Tolerance* (Fensterbreite),
-  *Max Distance* und *Max Horizontal Distance* – alle schreiben in dieselben Config-Werte, die
-  die Combat-Logik liest.
-- **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,
-  **ESC** bricht die Aufnahme ab (der bisherige Bind bleibt), **Rechtsklick** setzt auf **NONE**
-  zurück. Eine mittlere Maustaste (bzw. Mouse 4/5) lässt sich während der Aufnahme ebenfalls
-  zuweisen. Module haben standardmäßig **keinen** Keybind; der GUI-Keybind fällt immer auf
-  RIGHT_SHIFT zurück, damit die GUI nie unerreichbar wird.
-- **Client-Settings-Panel**: GUI-Keybind, GUI-Scale, Animation Speed, Blur, Click Sounds,
-  Button zum Öffnen der Cloud-Configs, Search Bar, Panel Borders und Theme
-  (Dark/Midnight/Neon/Ocean/Mono). Der Color Picker bietet
-  Accent-, Background-, Panel-, Active-, Text-, Secondary-Text-, Border- und Hover-Farben.
-- **Während des Keybind-Aufnahmemodus besitzt die Tastatur der Aufnahme**: Tippen landet weder in
-  der Modulsuche noch in einem Modul.
-- **Keybind-Priorität:** Modul-Keybinds werden vor den festen Editor-Tasten (F6–F9) geprüft. Wer eine
-  dieser Tasten bewusst einem Modul zuweist, löst damit das Modul aus; ohne Zuweisung öffnen die
-  Tasten wie gewohnt die Editoren.
-- **Reset-Aktionen**: Module Settings (stellt die dokumentierten Standard-Timingwerte wieder her),
-  Keybinds (GUI → RIGHT_SHIFT, alle Module → NONE), Theme,
-  GUI-Layout (Panels **und** HUD-Positionen) sowie Reset Everything. Reset Everything verlangt einen
-  zweiten Klick zur Bestätigung und löscht **keine** Friends.
-- Panels lassen sich per Drag & Drop verschieben (Header), scrollen bei Überlauf,
-  und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
-- Globale Suche: Im ClickGUI direkt tippen, um Module nach Name/Beschreibung zu filtern; ein rotes `!`
-  markiert doppelte Modul-Keybinds.
-- **F9** öffnet den Cloud-Config-Browser (Configs hochladen, suchen und laden). **F6** öffnet den Profil-Manager (Profile erstellen/speichern/laden/löschen), **F7** den Friends-Manager
-  (Name eingeben, Enter zum Hinzufügen, `F` zum Filtern, `[remove]` zum Löschen), **F8** den HUD-Editor.
-
-### HUD (unabhängig vom ClickGUI)
-
-Die HUD-Elemente werden unabhängig vom ClickGUI gerendert und vollständig unter
-`config/aerialmace-hud.json` gespeichert:
-
-| Element | Inhalt | Settings |
-| --- | --- | --- |
-| Watermark | Client-Name | Text (umbenennbar), Scale, Farbe |
-| FPS | aktuelle FPS | Label, Scale, Farbe |
-| Coordinates | `XYZ: x / y / z` | Nachkommastellen, Label, Scale, Farbe |
-| Speed | Bewegung in `b/s` oder `km/h` | Einheit, Nachkommastellen, Label, Scale, Farbe |
-| Active Modules | nur aktivierte Module, alphabetisch | Label, Scale, Farbe |
-
-**F8** öffnet den HUD-Editor: **Ziehen** = positionieren, **V** = ein/ausblenden, **C** = Farbe,
-**+/-** = Skalierung, **L** = Label, **D** = Nachkommastellen, **K** = Einheit (Speed),
-**ENTER** = Wasser­mark-Text umbenennen, **R** = Positionen zurücksetzen, **ESC** = schließen.
-Jede Änderung wird sofort gespeichert.
-
-Platzhalter-Module (ESP, Fullbright, HUD, Speed, Step, AutoGG, NoRotate) besitzen bewusst **keine**
-Settings, solange keine echte Logik dahintersteht – ein Setting ohne Wirkung wäre ein Fake-Setting.
-
-Die GUI schreibt ausschließlich in die bestehende `config/aerialmace.json` (Modul-Sidebar
-`MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte. Umgekehrt liest die GUI ihre
-Werte nach jedem Config-Laden, Profilwechsel oder übernommenen Cloud-Config wieder aus
-`ModConfig` zurück, sodass Anzeige und echte Combat-Werte nie auseinanderlaufen. Änderungen werden
-gedrosselt (maximal vier Schreibvorgänge pro Sekunde) und beim Verlassen der Welt werden Friends
-unter `config/aerialmace-friends.json` gespeichert. Friends stehen zentral über `FriendManager` für
-Combat und zukünftige Visual-Module bereit; das Combat-Modul ignoriert sie standardmäßig.
-
-## Technik
-
-- **Minecraft:** 1.21.11
-- **Fabric Loader:** ≥ 0.19.5
-- **Fabric API:** 0.141.6+1.21.11
-- **Mappings:** Yarn 1.21.11+build.6
-- **Java:** 21
-- **Loom:** 1.17.21
-
-### Architektur
-
-```
-de.aerialmace
-├── AerialMaceClient          # Entrypoint: Config, Keybinding, Tick-Hook
-├── config.ModConfig          # JSON-Config (config/aerialmace.json)
-├── sequence.SequenceStateMachine  # Nicht-blockierende State Machine (Client-Tick)
-├── target.TargetSelector     # Zielerkennung + Re-Validierung
-└── util
-    ├── Delays                # randomDelay(min, max) – inklusive, nicht-blockierend
-    └── InventoryUtils        # Vanilla-Inventarklicks, Mace-Suche, Hotbar-Wechsel
-```
-
-Die Sequenz ist vollständig **nicht-blockierend** implementiert: Delays werden als Deadline
-gespeichert und im Client-Tick geprüft – es gibt nirgends `Thread.sleep()`. Aktionen laufen im
-selben Tick, in dem die Delay-Deadline abläuft, damit das konfigurierte Timing exakt bleibt.
+| **Right Shift** | ClickGUI öffnen/schließen |
+| **F6** | Profile-Manager |
+| **F7** | Friends-Manager |
+| **F8** | HUD-Editor |
+| **F9** | Cloud-Configs |
 
 ## Cloud-Configs
 
-Cloud-Configs sind für die **Client-Konfigurationen** gedacht: Jeder kann seine aktuelle
-Client-Config hochladen und die Configs anderer Spieler direkt im Spiel durchsuchen und laden.
-Releases laufen davon unabhängig weiter wie bisher.
-
-### Einrichtung (einmalig, für den Betreiber)
-
-1. Projekt bei Supabase anlegen.
-2. SQL aus [`docs/supabase-cloud-configs.sql`](docs/supabase-cloud-configs.sql) im SQL-Editor ausführen.
-   Das legt die Tabelle `aerialmace_configs` und die Policies an: anonymes Lesen und anonymes
-   Hochladen erlaubt, Ändern und Löschen nicht – inklusive Upload-Drossel und automatischer
-   Aufräum-Trigger (siehe Sicherheit).
-3. Project URL und den öffentlichen **anon key** notieren.
-
-Das reicht komplett: Der **Supabase Free Plan** (kostenlos, keine Kreditkarte) enthält 500 MB
-Datenbank und 5 GB Traffic/Monat. Die Tabelle wird durch die unten beschriebenen Limits dauerhaft
-auf ca. **16 MB** begrenzt – die Cloud bleibt damit dauerhaft kostenlos betreibbar.
-
-### Nutzung (im Spiel)
-
-**F9** (oder `Client Settings → Open Cloud Configs`) öffnet den Cloud-Config-Browser:
-
-- `Share URL` – Project URL des Supabase-Projekts
-- `Anon Key` – öffentlicher anon key (kein Service-Key, kein Passwort)
-- `Author` – Name, der beim Upload angezeigt wird
-- `Upload Name` – Name des Eintrags
-
-Mit **TAB** wechselst du das Feld, **ENTER** lädt die aktuelle Config hoch, ein Klick auf eine Zeile
-lädt die jeweilige Cloud-Config herunter und übernimmt sie sofort. **R** aktualisiert die Liste.
-
-### Sicherheit
-
-- Nur der öffentliche anon key wird verwendet; der Client enthält keine privaten Schlüssel.
-- Es wird nichts hochgeladen, ohne dass du ENTER drückst.
-- Beim Upload werden nur Gameplay-Werte geteilt. URLs, Keys und Cloud-Schalter bleiben lokal.
-- Heruntergeladene Configs können die Cloud-Einstellungen nicht verändern (kein Redirect).
-- Nur HTTPS, begrenzte Antwortgröße (512 KB), alles asynchron, Offline-Betrieb bleibt möglich.
-
-**Schutz vor Missbrauch (z. B. Zip-Bomben oder Flood):**
-
-- Über die Cloud wandert ausschließlich JSON – niemals Archive/Dateien. Eine Zip-Bombe kann
-  hochgeladen oder heruntergeladen prinzipiell nicht entstehen; der Server akzeptiert pro Zeile
-  max. **32 KB** JSON und nur ein einzelnes JSON-Objekt.
-- **Drossel:** Max. **5 Uploads pro Autorenname pro Minute** (direkt in der INSERT-Policy).
-- **Begrenzte Tabelle:** Nach jedem Upload räumt ein Trigger automatisch auf und behält nur die
-  **neuesten 500 Zeilen**. Die Tabelle kann dadurch nie größer als ~16 MB werden – die Cloud
-  kann weder mit Spam vollgemüllt noch das Free-Trial-Limit gesprengt werden.
-- **Kein Manipulieren:** RLS erlaubt über den anon key ausschließlich Lesen und Hochladen.
-  Update und Delete sind technisch ausgeschlossen.
-- **Client-seitig:** Jede Antwort wird bei 512 KB abgeschnitten und abgelehnt, das JSON-Parsing
-  ist gegen tief verschachtelte „JSON-Bomben“ geschützt (Nesting-Limit + Guard), und jeder
-  angezeigte String wird auf 48 Zeichen begrenzt, bevor er gerendert wird.
+Wir haben **Cloud-Configs**: Im Spiel (**F9**) kannst du deine Client-Config hochladen und
+Configs von anderen Spielern direkt laden. Betrieben wird das über ein kostenloses
+Supabase-Projekt (Free Plan reicht dauerhaft) — Setup einmalig per
+[`docs/supabase-cloud-configs.sql`](docs/supabase-cloud-configs.sql). Sicher durch
+öffentlichen anon key, RLS, Upload-Drossel und automatisch begrenzter Tabelle —
+Details stehen im SQL-File.
 
 ## Releases
 
-Releases sind bewusst getrennt von den Cloud-Configs und laufen wie gewohnt über die
-[Releases-Seite](../../releases). Ein Versions-Tag löst den Release automatisch aus:
+Ein Push eines Version-Tags (`git tag v1.1.0 && git push origin v1.1.0`) baut die Mod per
+GitHub Actions und hängt die fertige JAR automatisch ans Release. Die Version steht in
+[`gradle.properties`](gradle.properties). Jeder Push auf `main` wird zusätzlich durch
+CI geprüft.
 
-```bash
-git tag v1.0.1 && git push origin v1.0.1
-```
+## Technik
 
-Der Workflow [`release.yml`](.github/workflows/release.yml) baut die Mod mit JDK 21 und hängt die
-fertige JAR (`build/libs/aerial-mace-automation-<version>.jar`) samt automatisch generierten
-Release-Notes an das GitHub-Release. Die Version selbst wird in [`gradle.properties`](gradle.properties)
-(`mod_version`) gepflegt. Eine Cloud-Anbindung ist dafür nicht nötig — Cloud ist ausschließlich für
-die Client-Configs zuständig.
+Minecraft 1.21.11 · Fabric Loader ≥ 0.19.5 · Fabric API 0.141.6+1.21.11 ·
+Yarn 1.21.11+build.6 · Java 21 · Loom 1.17.21
 
-## Release und Qualitätssicherung
-
-Die veröffentlichte JAR liegt auf der [Releases-Seite](../../releases). Jeder Push auf `main` und
-jeder Pull Request wird zusätzlich durch GitHub Actions mit JDK 21 und `./gradlew build` geprüft.
-Die Release-JAR wird aus einem sauberen Gradle-Build erzeugt; `*-sources.jar` ist nur für Entwickler.
-
-Weitere Informationen stehen in [`CHANGELOG.md`](CHANGELOG.md) und [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## Lizenz
-
-[MIT](LICENSE)
+Details: [`CHANGELOG.md`](CHANGELOG.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [MIT](LICENSE)
