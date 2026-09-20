@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1] - 2026-09-20
+
+### Changed
+
+- The built mod jar is now named `gugugaga-client-<version>.jar` instead of `aerial-mace-automation-<version>.jar`. The mod id, package and config paths stay unchanged.
+
 ## [1.1.0] - 2026-09-20
 
 ### Added
