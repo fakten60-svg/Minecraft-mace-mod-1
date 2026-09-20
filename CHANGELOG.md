@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Website: screenshots on the gallery page render at their natural aspect ratio instead of a forced 16:10 crop that zoomed into the sky of the HUD-editor scene on phones.
+- Website: the logo no longer shows an opaque black box in the center (the G mouth is a true cutout now).
+- Website: screenshots are rasterized with cairosvg — ImageMagick's MSVG renderer drew blurred glow shapes as harsh solid blue blobs.
+
 ## [1.2.0] - 2026-09-20
 
 ### Added
