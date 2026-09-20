@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-20
+
 ### Added
 
 - Notification system (`de.aerialmace.notification`): INFO/SUCCESS/WARNING/ERROR toasts at the bottom right, animated FPS-independently with a capped queue. Wired to real events: module toggles (via the new event bus), profile save/load/rename/delete, cloud config actions, config load problems and keybind conflicts.
@@ -12,11 +14,18 @@
 - Rotating config backups (`aerialmace-gui.json.bak.*`, max 3) plus session backups for the combat config and single `.bak` files for HUD layout and friends.
 - Profile rename (**R + name** in the profile manager) alongside create/save/load/delete.
 - Setting descriptions shown as tooltips in the ClickGUI (all MaceSwitch and Client Settings settings have real, short descriptions).
+- Unit test suite (52 tests): random delays, config normalization and cloud sanitizing, range/keybind/mode settings, event bus and notifications.
+- Standalone website in [`website/`](website/): home, features, download, documentation, changelog and FAQ with full SEO setup (canonical URLs, Open Graph, structured data, sitemap, robots.txt).
 
 ### Changed
 
 - `Module.addSetting` now returns the setting so registrations can chain `.describe(...)`.
 - Keybind assignment warns via notification when the key is already bound to another module (the first-bound module still wins when polled).
+- The Fabric API dependency uses the correct `net.fabricmc.fabric-api:fabric-api` coordinates.
+
+### Fixed
+
+- `ModeSetting` no longer crashes when constructed with an empty options list.
 
 ## [1.1.1] - 2026-09-20
 

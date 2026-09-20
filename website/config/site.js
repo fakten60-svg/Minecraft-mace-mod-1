@@ -14,7 +14,7 @@ window.SITE = {
   description:
     "Gugugaga Client is a Minecraft Java Edition 1.21.11 client featuring an automated aerial mace sequence, an animated ClickGUI, a customizable HUD, config profiles and cloud config sharing.",
 
-  version: "1.1.1",
+  version: "1.2.0",
   minecraftVersion: "1.21.11",
   fabricLoader: "0.19.5+",
   fabricApi: "0.141.6+1.21.11",
@@ -23,7 +23,7 @@ window.SITE = {
   repoUrl: "https://github.com/fakten60-svg/gugugaga-client",
   releasesUrl: "https://github.com/fakten60-svg/gugugaga-client/releases",
   latestJarUrl:
-    "https://github.com/fakten60-svg/gugugaga-client/releases/download/v1.1.1/gugugaga-client-1.1.1.jar",
+    "https://github.com/fakten60-svg/gugugaga-client/releases/download/v1.2.0/gugugaga-client-1.2.0.jar",
   issuesUrl: "https://github.com/fakten60-svg/gugugaga-client/issues",
   authorUrl: "https://github.com/fakten60-svg",
 };

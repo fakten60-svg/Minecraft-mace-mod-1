@@ -4,9 +4,9 @@
  */
 window.CHANGELOG = [
   {
-    version: "Unreleased",
+    version: "1.2.0",
     date: "2026-09-20",
-    latest: false,
+    latest: true,
     added: [
       "Notification system: animated INFO/SUCCESS/WARNING/ERROR toasts wired to real events (module toggles, profiles, cloud configs, keybind conflicts).",
       "Typed event bus decoupling modules from observers (ModuleToggleEvent).",
@@ -16,16 +16,22 @@ window.CHANGELOG = [
       "Rotating config backups: GUI config keeps the newest 3 backups, session/HUD/friends configs keep one.",
       "Profile rename (R + name in the profile manager) alongside create/save/load/delete.",
       "Setting tooltips in the ClickGUI with real descriptions for all MaceSwitch and Client Settings entries.",
+      "Unit test suite (52 tests) covering delays, config normalization, settings and the event bus.",
+      "Standalone website in /website with full SEO setup (canonical URLs, Open Graph, structured data, sitemap, robots.txt).",
     ],
     changed: [
       "Module.addSetting returns the setting so registrations can chain .describe(...).",
       "Keybind assignment warns via notification when the key is already bound to another module.",
+      "The Fabric API dependency uses the correct net.fabricmc.fabric-api:fabric-api coordinates.",
+    ],
+    fixed: [
+      "ModeSetting no longer crashes when constructed with an empty options list.",
     ],
   },
   {
     version: "1.1.1",
     date: "2026-09-20",
-    latest: true,
+    latest: false,
     changed: [
       "The built mod jar is now named gugugaga-client-<version>.jar. The mod id, package and config paths stay unchanged.",
     ],

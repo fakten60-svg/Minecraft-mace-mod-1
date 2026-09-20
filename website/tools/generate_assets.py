@@ -106,7 +106,7 @@ def social_preview():
     d.text((300, 420), "cloud config sharing for Minecraft 1.21.11.", font=slogan_font, fill=(200, 202, 214))
     # Footer chips
     chip_font = ImageFont.truetype(FONT_BOLD, 26)
-    for i, label in enumerate(["v1.1.1", "Fabric", "MC 1.21.11"]):
+    for i, label in enumerate(["v1.2.0", "Fabric", "MC 1.21.11"]):
         tw = d.textlength(label, font=chip_font)
         x0 = 300 + i * 200
         d.rounded_rectangle([x0, 510, x0 + tw + 36, 556], radius=16, fill=(30, 31, 42), outline=(70, 71, 88), width=1)
