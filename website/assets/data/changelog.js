@@ -1,0 +1,97 @@
+/**
+ * Structured changelog data (source of truth: the repository CHANGELOG.md).
+ * Add a new version at the top — the page renders it automatically.
+ */
+window.CHANGELOG = [
+  {
+    version: "Unreleased",
+    date: "2026-09-20",
+    latest: false,
+    added: [
+      "Notification system: animated INFO/SUCCESS/WARNING/ERROR toasts wired to real events (module toggles, profiles, cloud configs, keybind conflicts).",
+      "Typed event bus decoupling modules from observers (ModuleToggleEvent).",
+      "Debug overlay (F10 or the client setting): FPS, screen, GUI scale, config dirty state, combat state machine phase, active modules and real client/MC/Fabric versions.",
+      "Central ClientLogger with a debug gate; config/friend/HUD write failures are logged and surfaced via notification.",
+      "Config format versioning (configVersion) with a separated migration hook.",
+      "Rotating config backups: GUI config keeps the newest 3 backups, session/HUD/friends configs keep one.",
+      "Profile rename (R + name in the profile manager) alongside create/save/load/delete.",
+      "Setting tooltips in the ClickGUI with real descriptions for all MaceSwitch and Client Settings entries.",
+    ],
+    changed: [
+      "Module.addSetting returns the setting so registrations can chain .describe(...).",
+      "Keybind assignment warns via notification when the key is already bound to another module.",
+    ],
+  },
+  {
+    version: "1.1.1",
+    date: "2026-09-20",
+    latest: true,
+    changed: [
+      "The built mod jar is now named gugugaga-client-<version>.jar. The mod id, package and config paths stay unchanged.",
+    ],
+  },
+  {
+    version: "1.1.0",
+    date: "2026-09-20",
+    latest: false,
+    added: [
+      "Cloud-config hardening: upload throttle (max 5 uploads per author per minute) and an automatic retention trigger that keeps only the newest 500 rows, so the shared table stays bounded (~16 MB).",
+      "Client-side abuse protection: sanitized upload names/authors, truncated display strings and a defense-in-depth guard against deeply nested hostile JSON.",
+      "New module-settings screenshot and a refreshed HUD-editor screenshot.",
+    ],
+    fixed: [
+      "A corrupt aerialmace-gui.json no longer throws while loading: unknown keys are ignored, wrong types are skipped, and one broken entry cannot abort the whole load.",
+      "Sliders, random-delay ranges and the color picker now receive GUI-scaled mouse coordinates while dragging, so a GUI scale other than 1 no longer writes wrong combat values.",
+      "Boolean toggles rendered ON while being OFF and stayed stale when the value changed outside the GUI.",
+      "\u201cReset Keybinds\u201d now resets the real GUI Keybind setting to RIGHT_SHIFT.",
+      "Panel positions survive a window resize.",
+      "Typing while a keybind is being recorded no longer leaks into the module search.",
+      "Mode dropdowns only consume clicks inside their own list.",
+      "HUD element scale is applied when rendering (it was persisted but ignored).",
+      "Saving a config profile now persists the live state first, so profiles are never stale.",
+      "The deprecated HudRenderCallback was replaced with the current HudElementRegistry API.",
+      "Random-delay range bars no longer break on out-of-range config values: bounds are clamped into the GUI range so the handles can never slide off the track or end up reversed.",
+      "The \u201cTarget Height\u201d and \u201cTarget Tolerance\u201d sliders no longer overwrite each other.",
+      "The ClickGUI mirrors the real combat values after a config load, profile switch or applied cloud config.",
+      "An applied cloud config or profile can no longer leave the master switch mirrored wrongly.",
+      "Config values are no longer overwritten while the GUI is being constructed: settings write to their backing config only on real changes.",
+      "\u201cReset Module Settings\u201d restores the documented defaults (initial 100\u2013120, equip 70\u201380, attack 67\u201390 ms, target height 3.0 \u00b1 0.2).",
+      "The GUI keybind can no longer be cleared to NONE, which used to make the ClickGUI unreachable.",
+      "The color picker no longer draws inverted gradients for a frame while unfolding, and picks up colors changed outside the picker.",
+      "Verified the 1.21.11 PlayerScreenHandler layout (armor 5\u20138, hotbar 36\u201344, offhand 45) and the clickSlot sync-id guard; the chestplate equip and hotbar switch use the correct slots.",
+    ],
+    added: [
+      "\u201cMax Horizontal Distance\u201d slider, so both reach limits from the spec are configurable in the GUI.",
+      "Mouse buttons can be assigned as module/GUI keybinds while the keybind row is recording.",
+      "Tag-triggered release workflow that publishes the built jar as a GitHub Release.",
+    ],
+    changed: [
+      "README slimmed down to a compact overview.",
+      "Renamed the user-facing client to Gugugaga Client (watermark, window titles, overlay messages and the mod display name). The mod id, package and config file paths stay unchanged so existing configs keep working.",
+      "\u201cReset GUI Layout\u201d also resets HUD positions; \u201cReset Everything\u201d requires a confirmation click and no longer deletes the friend list.",
+      "Module keybinds take precedence over the reserved F6\u2013F9 editor shortcuts.",
+      "HUD gained a Speed element plus per-element settings (scale, color, label, decimals, unit) and a full editor (visibility, scale, color, rename, reset).",
+      "Placeholder modules (ESP, Fullbright, HUD, Speed, Step, AutoGG, NoRotate) no longer expose settings without an effect.",
+    ],
+  },
+  {
+    version: "1.0.0",
+    date: "2026-09-19",
+    latest: false,
+    added: [
+      "Additional configurable random-delay ranges for target lock settling and post-attack cooldown.",
+      "New non-blocking TARGET_LOCK_DELAY and POST_ATTACK_DELAY state-machine phases; both default to 0 ms for backward-compatible timing.",
+      "Existing non-blocking aerial mace sequence for Minecraft 1.21.11.",
+      "Fabric client module system with generic Boolean, Slider, Range, Mode, Keybind, Color, and Action settings.",
+      "Animated ClickGUI with Combat, Visuals, Movement, Misc, and Client Settings panels.",
+      "Two-handle random-delay ranges bound directly to the combat configuration.",
+      "Right Shift GUI keybind with persistent module keybinds defaulting to NONE.",
+      "Central FriendManager and Ignore Friends combat setting.",
+      "Sprint module with Legit/Rage, omnidirectional, keep-sprint, and forward requirements.",
+      "Search, keybind-conflict indicators, profile manager, Friends screen, HUD overlay, and HUD editor.",
+      "Persistent GUI, module, friend, profile, and HUD configuration.",
+      "GitHub Actions build validation for pushes and pull requests.",
+      "Cloud config sharing for client configs only; releases stay manual and independent.",
+    ],
+  },
+];
