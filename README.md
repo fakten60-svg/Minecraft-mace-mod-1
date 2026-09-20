@@ -84,7 +84,10 @@ Das Projekt hat eine eigene statische Website im Ordner [`website/`](website/)
 keine Abhängigkeiten.
 
 **Live:** <https://fakten60-svg.github.io/gugugaga-client/> — Änderungen an
-`website/` werden automatisch per GitHub Actions deployt.
+`website/` werden automatisch per GitHub Actions deployt. Ein Umzug nach
+`gugugagaclient.github.io` ist in [`website/README.md`](website/README.md)
+beschrieben (dafür muss das Repo `gugugagaclient.github.io` einmalig manuell
+angelegt werden — die App darf keine Repos erstellen).
 Details: [`website/README.md`](website/README.md).
 
 ## Technik

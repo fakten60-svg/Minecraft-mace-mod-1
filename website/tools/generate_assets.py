@@ -12,13 +12,14 @@ import os
 import subprocess
 import sys
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ASSETS = os.path.join(ROOT, "website", "assets", "img")
 SHOTS = os.path.join(ROOT, "docs", "screenshots")
 
 ACCENT = (59, 130, 246)          # ThemeManager: 0xFF3B82F6
+ACCENT_LIGHT = (96, 165, 250)
 BG_DARK = (16, 16, 20)           # ThemeManager: 0xC0101014
 PANEL = (22, 22, 28)             # ThemeManager: 0xE016161C
 TEXT = (242, 242, 242)           # ThemeManager: 0xFFF2F2F2
@@ -29,10 +30,10 @@ FONT_REG = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 def rasterize_svg(svg_name: str, width: int) -> Image.Image:
     """Convert one of the real client screenshots to PNG at the given width."""
-    out = f"/tmp/_site_{svg_name}.png"
+    out = f"/tmp/_site_{svg_name}_{width}.png"
     subprocess.run(
-        ["convert", "-background", "#101014", os.path.join(SHOTS, svg_name),
-         "-resize", f"{width}x", out],
+        ["convert", "-background", "#101014", "-density", "192",
+         os.path.join(SHOTS, svg_name), "-resize", f"{width}x", out],
         check=True, cwd=ROOT,
     )
     return Image.open(out).convert("RGB")
@@ -47,77 +48,113 @@ def rounded(img: Image.Image, radius: int) -> Image.Image:
     return out
 
 
-def shoot(name: str, svg: str, width: int = 1280):
-    """Real screenshot as a web-ready rounded PNG."""
-    img = rasterize_svg(svg, width)
-    rounded(img, 14).save(os.path.join(ASSETS, f"{name}.png"), optimize=True)
-    print(f"  {name}.png  {img.size[0]}x{img.size[1]}")
+def save_shot(img: Image.Image, name: str):
+    """Save a screenshot as WebP (primary) and optimized PNG (fallback)."""
+    rounded(img, 16).save(os.path.join(ASSETS, f"{name}.webp"), quality=82, method=6)
+    rounded(img, 16).save(os.path.join(ASSETS, f"{name}.png"), optimize=True)
+    print(f"  {name}: webp={os.path.getsize(os.path.join(ASSETS, name + '.webp')) // 1024} KB "
+          f"png={os.path.getsize(os.path.join(ASSETS, name + '.png')) // 1024} KB @ {img.size[0]}x{img.size[1]}")
+
+
+def shoot(name: str, svg: str, width: int = 1600):
+    """Real screenshot as sharp, compressed web assets."""
+    save_shot(rasterize_svg(svg, width), name)
 
 
 def logo_mark(size: int) -> Image.Image:
-    """The client logo mark: rounded tile + stylized mace head."""
+    """The client logo mark: rounded tile with glow, stylized mace + sparkle."""
     s = size
-    scale = s / 128.0
-    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
+    scale = s / 512.0
 
     def r(v):
         return int(round(v * scale))
 
-    d.rounded_rectangle([r(6), r(6), r(122), r(122)], radius=r(24), fill=(*ACCENT, 255))
-    d.rounded_rectangle([r(6), r(6), r(122), r(122)], radius=r(24), outline=(*TEXT, 90), width=max(1, r(2)))
-    # Mace head: diamond of studs
-    cx, cy = r(64), r(58)
-    d.polygon([(cx, cy - r(30)), (cx + r(30), cy), (cx, cy + r(30)), (cx - r(30), cy)], fill=(*TEXT, 255))
-    for ox, oy in [(0, -18), (18, 0), (0, 18), (-18, 0)]:
-        d.ellipse([cx + r(ox) - r(7), cy + r(oy) - r(7), cx + r(ox) + r(7), cy + r(oy) + r(7)], fill=(*ACCENT, 255))
-    # Handle
-    d.rounded_rectangle([cx - r(6), cy + r(18), cx + r(6), cy + r(44)], radius=r(4), fill=(*TEXT, 235))
-    return img
+    hi = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+
+    # Soft outer glow behind the tile
+    glow = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    gd.rounded_rectangle([r(46), r(46), r(466), r(466)], radius=r(96), fill=(*ACCENT, 150))
+    glow = glow.filter(ImageFilter.GaussianBlur(r(36)))
+    hi.alpha_composite(glow)
+
+    d = ImageDraw.Draw(hi)
+    # Tile with vertical gradient (accent -> deeper blue)
+    grad = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    gdr = ImageDraw.Draw(grad)
+    top, bottom = (74, 144, 250), (37, 99, 235)
+    for y in range(r(64), r(448)):
+        t = (y - r(64)) / max(1, r(384))
+        col = tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
+        gdr.line([(r(64), y), (r(448), y)], fill=(*col, 255))
+    mask = Image.new("L", (s, s), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([r(64), r(64), r(448), r(448)], radius=r(88), fill=255)
+    hi.paste(grad, (0, 0), mask)
+
+    # Inner highlight edge
+    d.rounded_rectangle([r(64), r(64), r(448), r(448)], radius=r(88),
+                        outline=(*TEXT, 120), width=max(1, r(6)))
+    d.line([(r(110), r(96)), (r(400), r(96))], fill=(*TEXT, 70), width=max(1, r(6)))
+
+    # Stylized mace: shaft + spiked head
+    shaft_top = (r(256), r(120))
+    shaft_bot = (r(256), r(372))
+    d.line([shaft_top, shaft_bot], fill=(*TEXT, 235), width=r(26))
+    # Head: rounded diamond
+    head = [(r(256), r(96)), (r(352), r(192)), (r(256), r(288)), (r(160), r(192))]
+    d.polygon(head, fill=(*TEXT, 250))
+    # Studs
+    for ox, oy in [(0, -34), (34, 0), (0, 34), (-34, 0)]:
+        cx, cy = r(256) + r(ox), r(192) + r(oy)
+        d.ellipse([cx - r(15), cy - r(15), cx + r(15), cy + r(15)], fill=(*ACCENT, 255))
+    # Center gem
+    d.ellipse([r(256) - r(26), r(192) - r(26), r(256) + r(26), r(192) + r(26)], fill=(29, 78, 216, 255))
+    d.ellipse([r(256) - r(14), r(192) - r(20), r(256) + r(2), r(192) + r(2)], fill=(147, 197, 253, 255))
+    # Pommel
+    d.ellipse([r(256) - r(20), r(364), r(256) + r(20), r(404)], fill=(*ACCENT, 255))
+    # Sparkle top-right
+    d.line([(r(392), r(110)), (r(392), r(170))], fill=(*TEXT, 220), width=r(10))
+    d.line([(r(362), r(140)), (r(422), r(140))], fill=(*TEXT, 220), width=r(10))
+    return hi
 
 
 def favicons():
-    mark = logo_mark(512)
-    for size, name in [(16, "favicon-16x16.png"), (32, "favicon-32x32.png"), (180, "apple-touch-icon.png"), (192, "icon-192.png"), (512, "icon-512.png")]:
-        mark.resize((size, size), Image.LANCZOS).save(os.path.join(ASSETS, name), optimize=True)
-    print("  favicons done")
+    for size, name in [(16, "favicon-16x16.png"), (32, "favicon-32x32.png"),
+                       (180, "apple-touch-icon.png"), (192, "icon-192.png"), (512, "icon-512.png")]:
+        logo_mark(size).save(os.path.join(ASSETS, name), optimize=True)
+    print("  favicons regenerated")
 
 
 def social_preview():
-    """1200x630 OG card: dark panel, logo, name, real slogan."""
+    """1200x630 OG card: dark panel, new logo, name, real slogan."""
     w, h = 1200, 630
     img = Image.new("RGB", (w, h), BG_DARK)
     d = ImageDraw.Draw(img)
-    # Subtle grid of accent dots (matches the client's bordered accent style)
     for x in range(60, w, 84):
         for y in range(60, h, 84):
             d.ellipse([x - 2, y - 2, x + 2, y + 2], fill=(35, 36, 48))
-    # Accent frame
     d.rounded_rectangle([24, 24, w - 24, h - 24], radius=28, outline=(*ACCENT, 255), width=3)
-    # Logo + name
-    logo = logo_mark(168)
-    img.paste(logo, (96, 150), logo)
-    name_font = ImageFont.truetype(FONT_BOLD, 84)
-    d.text((300, 158), "Gugugaga Client", font=name_font, fill=TEXT)
-    d.text((306, 262), "Minecraft Client", font=ImageFont.truetype(FONT_REG, 40), fill=(154, 154, 165))
-    # Slogan (the client's real description, shortened)
-    slogan_font = ImageFont.truetype(FONT_REG, 34)
-    d.text((300, 372), "Aerial mace sequence, ClickGUI, HUD editor and", font=slogan_font, fill=(200, 202, 214))
-    d.text((300, 420), "cloud config sharing for Minecraft 1.21.11.", font=slogan_font, fill=(200, 202, 214))
-    # Footer chips
+
+    logo = logo_mark(192)
+    img.paste(logo, (86, 130), logo)
+    d.text((320, 150), "Gugugaga Client", font=ImageFont.truetype(FONT_BOLD, 84), fill=TEXT)
+    d.text((326, 254), "Minecraft Client", font=ImageFont.truetype(FONT_REG, 40), fill=(154, 154, 165))
+    d.text((320, 366), "Aerial mace sequence, ClickGUI, HUD editor and", font=ImageFont.truetype(FONT_REG, 34), fill=(200, 202, 214))
+    d.text((320, 414), "cloud config sharing for Minecraft 1.21.11.", font=ImageFont.truetype(FONT_REG, 34), fill=(200, 202, 214))
     chip_font = ImageFont.truetype(FONT_BOLD, 26)
     for i, label in enumerate(["v1.2.0", "Fabric", "MC 1.21.11"]):
         tw = d.textlength(label, font=chip_font)
-        x0 = 300 + i * 200
-        d.rounded_rectangle([x0, 510, x0 + tw + 36, 556], radius=16, fill=(30, 31, 42), outline=(70, 71, 88), width=1)
-        d.text((x0 + 18, 520), label, font=chip_font, fill=(*ACCENT, 255))
+        x0 = 320 + i * 200
+        d.rounded_rectangle([x0, 508, x0 + tw + 36, 554], radius=16, fill=(30, 31, 42), outline=(70, 71, 88), width=1)
+        d.text((x0 + 18, 518), label, font=chip_font, fill=(*ACCENT, 255))
     img.save(os.path.join(ASSETS, "social-preview.png"), optimize=True)
-    print("  social-preview.png 1200x630")
+    img.save(os.path.join(ASSETS, "social-preview.webp"), quality=85, method=6)
+    print(f"  social-preview regenerated ({os.path.getsize(os.path.join(ASSETS, 'social-preview.webp')) // 1024} KB webp)")
 
 
 def main():
     os.makedirs(ASSETS, exist_ok=True)
-    print("Rasterizing real client screenshots...")
+    print("Rasterizing real client screenshots (2x sharp)...")
     shoot("client-clickgui", "clickgui.svg")
     shoot("client-hud-editor", "hud-editor.svg")
     shoot("client-module-settings", "module.svg")

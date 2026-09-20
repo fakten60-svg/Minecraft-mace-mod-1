@@ -23,13 +23,32 @@ external dependencies — plain HTML/CSS/JS that can be hosted anywhere.
 (`SITE_URL`). It feeds the canonical URLs, Open Graph/Twitter tags and JSON-LD structured
 data injected by `assets/js/head.js`.
 
-**When the real domain goes live**, update in these places (all hold the same origin):
+**When the final URL goes live**, update in these places (all hold the same origin):
 
 1. `config/site.js` → `siteUrl`
 2. `sitemap.xml` → the `<loc>` entries
 3. `robots.txt` → the `Sitemap:` line
 
 A global search for `fakten60-svg.github.io/gugugaga-client` finds every occurrence.
+
+### Moving to gugugagaclient.github.io
+
+`gugugagaclient.github.io` is a **user-site URL**; GitHub serves it only from a repo named
+exactly `gugugagaclient.github.io` under the owner account. The current Freebuff
+credential cannot create repositories, so the one-time setup is manual:
+
+1. Create the public repo **`fakten60-svg/gugugagaclient.github.io`** on GitHub.
+2. Copy the contents of this `website/` folder into that repo's default branch root
+   (e.g. `git clone https://github.com/fakten60-svg/gugugagaclient.github.io &&
+   cp -r website/* gugugagaclient.github.io/ && git -C gugugagaclient.github.io add -A &&
+   git -C gugugagaclient.github.io commit -m "Import Gugugaga Client website" &&
+   git -C gugugagaclient.github.io push`).
+3. Update the three places above to `https://gugugagaclient.github.io` and push.
+4. Optional: on the old repo, redirect with a tiny `index.html`:
+   `meta http-equiv="refresh" content="0; url=https://gugugagaclient.github.io/"`
+   (plus a canonical link), or keep both sites as-is.
+
+Until then the site lives at `https://fakten60-svg.github.io/gugugaga-client/`.
 
 ## Content updates
 
@@ -59,7 +78,7 @@ A global search for `fakten60-svg.github.io/gugugaga-client` finds every occurre
 
 ## Deploy
 
-**Live: https://fakten60-svg.github.io/gugugaga-client/** — deployed automatically by
+**Live: https://fakten60-svg.github.io/gugugaga-client/** (planned move: `gugugagaclient.github.io`, see above) — deployed automatically by
 `.github/workflows/pages.yml` (GitHub Actions deployment mode) whenever a push to `main`
 touches `website/`. Manual runs: `gh workflow run pages.yml`.
 
