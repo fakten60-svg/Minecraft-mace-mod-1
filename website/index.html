@@ -46,6 +46,9 @@
 
   <main id="main">
     <section class="hero">
+      <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+      <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+      <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
       <div class="hero-inner">
         <img class="hero-logo" src="assets/img/logo.svg" alt="Gugugaga Client logo" width="96" height="96">
         <h1>Gugugaga <span class="accent">Client</span></h1>
@@ -60,6 +63,12 @@
           <a class="btn btn-primary" href="download.html">Download</a>
           <a class="btn btn-ghost" href="features.html">View Features</a>
           <a class="btn btn-ghost" href="documentation.html">Documentation</a>
+        </div>
+        <div class="stat-band reveal" aria-label="Client facts">
+          <div class="stat"><b>52</b><span>Unit tests</span></div>
+          <div class="stat"><b>100%</b><span>Open source</span></div>
+          <div class="stat"><b>8</b><span>HUD elements</span></div>
+          <div class="stat"><b>0 €</b><span>Forever free</span></div>
         </div>
       </div>
     </section>
@@ -124,6 +133,10 @@
           <p>Press <strong>Right Shift</strong> in game. The ClickGUI opens with draggable panels, live search and settings that are bound directly to the client's real configuration.</p>
         </div>
         <div class="shot-frame reveal">
+          <div class="shot-bar" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="url">gugugaga client — clickgui · right shift</span>
+          </div>
           <img src="assets/img/client-clickgui.png" data-webp="assets/img/client-clickgui.webp" alt="Screenshot of the Gugugaga Client ClickGUI showing category panels, module list and the search field" loading="lazy" width="1600" height="937">
           <p class="shot-caption">The ClickGUI with category panels, module list and search.</p>
         </div>
@@ -133,7 +146,7 @@
             <figcaption><strong>Module settings</strong>Two-handle random delay ranges, sliders and keybind rows.</figcaption>
           </button>
           <button class="gallery-item reveal" type="button" data-full="assets/img/client-hud-editor.webp">
-            <img src="assets/img/client-hud-editor.png" data-webp="assets/img/client-hud-editor.webp" alt="Screenshot of the HUD editor with movable elements and per-element settings" loading="lazy" width="1600" height="937">
+            <img src="assets/img/client-hud-editor.png" data-webp="assets/img/client-hud-editor.webp" alt="In-game HUD elements for FPS, coordinates and speed shown over a Minecraft scene in the HUD editor" loading="lazy" width="1600" height="937">
             <figcaption><strong>HUD editor</strong>Move, scale and restyle every HUD element (F8).</figcaption>
           </button>
         </div>

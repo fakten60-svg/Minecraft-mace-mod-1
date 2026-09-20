@@ -1,20 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="tile" cx="0.5" cy="0.42" r="0.75">
-      <stop offset="0" stop-color="#0a1630"/>
-      <stop offset="1" stop-color="#04070f"/>
+    <radialGradient id="tile" cx="0.5" cy="0.42" r="0.78">
+      <stop offset="0" stop-color="#0d1c3d"/>
+      <stop offset="1" stop-color="#050810"/>
     </radialGradient>
     <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#5cf8f0"/>
       <stop offset="0.55" stop-color="#38b6ff"/>
       <stop offset="1" stop-color="#3b82f6"/>
     </linearGradient>
-    <linearGradient id="neonBar" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#2ea8ff"/>
-      <stop offset="1" stop-color="#3df5ec"/>
-    </linearGradient>
     <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="10"/>
+      <feGaussianBlur stdDeviation="9"/>
     </filter>
     <filter id="glowSoft" x="-80%" y="-80%" width="260%" height="260%">
       <feGaussianBlur stdDeviation="4"/>
@@ -42,57 +38,61 @@
   </g>
   <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="#132a55" stroke-width="3"/>
 
-  <!-- Glow layer -->
-  <g filter="url(#glow)" opacity="0.85" fill="none" stroke-linejoin="miter">
-    <path d="M 176 106 L 336 106 L 406 176 L 406 336 L 336 406 L 176 406 L 106 336 L 106 176 Z" stroke="#22d3ee" stroke-width="22"/>
-    <path d="M 198 154 L 314 154 L 358 198 L 358 314 L 314 358 L 198 358 L 154 314 L 154 198 Z" stroke="#22d3ee" stroke-width="22"/>
-    <rect x="240" y="252" width="160" height="76" rx="16" stroke="#22d3ee" stroke-width="22"/>
+  <!-- Glow under-layer -->
+  <g filter="url(#glow)" opacity="0.8" fill="none" stroke="#22d3ee" stroke-width="20" stroke-linejoin="miter">
+    <!-- outer ring: open on the right side (mouth) -->
+    <path d="M 348 118 L 200 118 L 118 200 L 118 312 L 200 394 L 340 394 L 398 336 L 398 318"/>
+    <!-- inner ring -->
+    <path d="M 318 168 L 218 168 L 168 218 L 168 294 L 218 344 L 300 344 L 344 300 L 344 274"/>
+    <!-- jaw bar pointing into the mouth -->
+    <path d="M 236 262 L 236 330 L 372 330 L 372 262"/>
   </g>
 
-  <!-- The G: outer loop + inner loop (stroked octagons) -->
+  <!-- Neon strokes -->
+  <g fill="none" stroke-linejoin="miter" stroke-linecap="square">
+    <!-- outer ring -->
+    <path d="M 348 118 L 200 118 L 118 200 L 118 312 L 200 394 L 340 394 L 398 336 L 398 318" stroke="#081527" stroke-width="27"/>
+    <path d="M 348 118 L 200 118 L 118 200 L 118 312 L 200 394 L 340 394 L 398 336 L 398 318" stroke="url(#neon)" stroke-width="12"/>
+    <!-- inner ring -->
+    <path d="M 318 168 L 218 168 L 168 218 L 168 294 L 218 344 L 300 344 L 344 300 L 344 274" stroke="#081527" stroke-width="27"/>
+    <path d="M 318 168 L 218 168 L 168 218 L 168 294 L 218 344 L 300 344 L 344 300 L 344 274" stroke="url(#neon)" stroke-width="12"/>
+    <!-- jaw bar -->
+    <path d="M 236 262 L 236 330 L 372 330 L 372 262" stroke="#081527" stroke-width="27"/>
+    <path d="M 236 262 L 236 330 L 372 330 L 372 262" stroke="url(#neon)" stroke-width="12"/>
+  </g>
+
+  <!-- Edge highlight -->
+  <g stroke="#d9fdff" stroke-width="3.5" opacity="0.9" stroke-linecap="round">
+    <line x1="205" y1="111" x2="330" y2="111"/>
+    <line x1="111" y1="205" x2="111" y2="308"/>
+  </g>
+
+  <!-- Detached fragment top-right (mirrors the reference's broken corner) -->
   <g fill="none" stroke-linejoin="miter">
-    <path d="M 176 106 L 336 106 L 406 176 L 406 336 L 336 406 L 176 406 L 106 336 L 106 176 Z" stroke="#081527" stroke-width="30"/>
-    <path d="M 198 154 L 314 154 L 358 198 L 358 314 L 314 358 L 198 358 L 154 314 L 154 198 Z" stroke="#081527" stroke-width="30"/>
-    <rect x="240" y="252" width="160" height="76" rx="16" stroke="#081527" stroke-width="30"/>
-    <path d="M 176 106 L 336 106 L 406 176 L 406 336 L 336 406 L 176 406 L 106 336 L 106 176 Z" stroke="url(#neon)" stroke-width="13"/>
-    <path d="M 198 154 L 314 154 L 358 198 L 358 314 L 314 358 L 198 358 L 154 314 L 154 198 Z" stroke="url(#neon)" stroke-width="13"/>
-    <rect x="240" y="252" width="160" height="76" rx="16" stroke="url(#neonBar)" stroke-width="13"/>
-  </g>
-  <!-- Edge highlights -->
-  <g stroke="#d9fdff" stroke-width="3.5" opacity="0.85" stroke-linecap="round">
-    <line x1="180" y1="99" x2="330" y2="99"/>
-    <line x1="99" y1="180" x2="99" y2="300"/>
+    <path d="M 366 106 L 396 106 L 424 134 L 424 164" stroke="#081527" stroke-width="24"/>
+    <path d="M 366 106 L 396 106 L 424 134 L 424 164" stroke="#38b6ff" stroke-width="10" opacity="0.9"/>
   </g>
 
-  <!-- Cut: open right side above the jaw bar (mouth) -->
-  <rect x="292" y="132" width="160" height="212" fill="#04070f"/>
-  <!-- Floating fragment top-right (detached by the mouth cut) -->
-  <g stroke-linejoin="miter" fill="none">
-    <path d="M 338 104 L 372 104 L 402 134 L 402 168" stroke="#0a1c38" stroke-width="24"/>
-    <path d="M 338 104 L 372 104 L 402 134 L 402 168" stroke="#2ea8ff" stroke-width="11" opacity="0.9"/>
-  </g>
-  <!-- Decorative slashes through the ring -->
-  <g fill="#04070f">
-    <rect x="247" y="72" width="17" height="86" rx="6" transform="rotate(30 256 115)"/>
-    <rect x="247" y="366" width="17" height="86" rx="6" transform="rotate(30 256 409)"/>
-  </g>
-  <g fill="none" stroke-linejoin="miter" opacity="0.75">
-    <path d="M 296 78 L 313 104 L 296 130" stroke="#2ea8ff" stroke-width="6"/>
-    <path d="M 216 382 L 199 408 L 216 434" stroke="#2ea8ff" stroke-width="6"/>
+  <!-- Decorative slashes crossing the ring -->
+  <g stroke-linecap="round">
+    <line x1="290" y1="86" x2="322" y2="152" stroke="#050810" stroke-width="18"/>
+    <line x1="293" y1="90" x2="319" y2="146" stroke="#2ea8ff" stroke-width="6" opacity="0.85"/>
+    <line x1="222" y1="360" x2="190" y2="426" stroke="#050810" stroke-width="18"/>
+    <line x1="219" y1="366" x2="193" y2="420" stroke="#2ea8ff" stroke-width="6" opacity="0.85"/>
   </g>
 
   <!-- Sparkles + dots -->
   <g stroke="#bff7ff" stroke-width="4" stroke-linecap="round" opacity="0.9">
-    <line x1="428" y1="222" x2="428" y2="246"/>
-    <line x1="416" y1="234" x2="440" y2="234"/>
+    <line x1="432" y1="222" x2="432" y2="246"/>
+    <line x1="420" y1="234" x2="444" y2="234"/>
   </g>
   <g stroke="#8be9ff" stroke-width="3" stroke-linecap="round" opacity="0.7">
-    <line x1="88" y1="150" x2="88" y2="166"/>
-    <line x1="80" y1="158" x2="96" y2="158"/>
+    <line x1="86" y1="148" x2="86" y2="164"/>
+    <line x1="78" y1="156" x2="94" y2="156"/>
   </g>
   <g fill="#22d3ee" filter="url(#glowSoft)">
-    <circle cx="452" cy="360" r="5" opacity="0.8"/>
-    <circle cx="70" cy="96" r="4" opacity="0.6"/>
-    <circle cx="452" cy="96" r="3" opacity="0.55"/>
+    <circle cx="452" cy="362" r="5" opacity="0.8"/>
+    <circle cx="70" cy="94" r="4" opacity="0.6"/>
+    <circle cx="452" cy="94" r="3" opacity="0.55"/>
   </g>
 </svg>
