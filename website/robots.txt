@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /config/
+Disallow: /tools/
+
+Sitemap: https://fakten60-svg.github.io/gugugaga-client/sitemap.xml

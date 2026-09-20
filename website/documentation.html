@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-canonical-path="/documentation.html" data-og-title="Gugugaga Client Documentation">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gugugaga Client Documentation</title>
+  <meta name="description" content="Gugugaga Client documentation: getting started, ClickGUI, modules, HUD editor, keybinds, config profiles, cloud configs, friends, themes and troubleshooting.">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script src="config/site.js"></script>
+  <script src="assets/js/head.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/img/icon-192.png" alt="Gugugaga Client logo" width="30" height="30">
+        Gugugaga<span class="accent">Client</span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="download.html">Download</a></li>
+        <li><a href="documentation.html" aria-current="page">Documentation</a></li>
+        <li><a href="changelog.html">Changelog</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li class="nav-cta-mobile"><a class="btn btn-primary btn-sm" href="download.html">Download</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a class="icon-link" href="https://github.com/fakten60-svg/gugugaga-client" aria-label="GitHub repository" rel="noopener">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        </a>
+        <a class="btn btn-primary btn-sm" href="download.html">Download</a>
+      </div>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" style="padding-bottom: 36px;">
+      <div class="hero-inner">
+        <span class="eyebrow">Documentation</span>
+        <h1>Documentation</h1>
+        <p class="tagline">Everything you need to configure Gugugaga Client.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 8px;">
+      <div class="container docs-layout">
+        <nav class="docs-nav" aria-label="Documentation sections">
+          <h2>On this page</h2>
+          <ul>
+            <li><a href="#getting-started">Getting Started</a></li>
+            <li><a href="#clickgui">ClickGUI</a></li>
+            <li><a href="#modules">Modules</a></li>
+            <li><a href="#hud">HUD</a></li>
+            <li><a href="#keybinds">Keybinds</a></li>
+            <li><a href="#config">Config &amp; Profiles</a></li>
+            <li><a href="#cloud">Cloud Configs</a></li>
+            <li><a href="#friends">Friends</a></li>
+            <li><a href="#themes">Themes</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+          </ul>
+        </nav>
+
+        <div class="docs-content">
+          <h2 id="getting-started">Getting Started</h2>
+          <p>Install the client as described on the <a href="download.html">download page</a>: Minecraft 1.21.11, Fabric Loader, Fabric API, then the client jar in your <code>mods</code> folder.</p>
+          <p>Once in a world, the essential keys are:</p>
+          <ul>
+            <li><span class="kbd">Right Shift</span> — open and close the ClickGUI (default, rebindable)</li>
+            <li><span class="kbd">F6</span> — config profiles manager</li>
+            <li><span class="kbd">F7</span> — friends manager</li>
+            <li><span class="kbd">F8</span> — HUD editor</li>
+            <li><span class="kbd">F9</span> — cloud configs</li>
+            <li><span class="kbd">F10</span> — debug overlay</li>
+          </ul>
+
+          <h2 id="clickgui">ClickGUI</h2>
+          <p>The ClickGUI is organized in draggable panels for <strong>Combat</strong>, <strong>Visuals</strong>, <strong>Movement</strong>, <strong>Misc</strong> and <strong>Client Settings</strong>. Use the search field to filter modules by name. Panel positions, GUI scale and the GUI keybind are saved automatically.</p>
+          <h3>Setting types</h3>
+          <ul>
+            <li><strong>Toggle</strong> — click a module to enable or disable it.</li>
+            <li><strong>Slider</strong> — click and drag to set a numeric value.</li>
+            <li><strong>Range</strong> — two handles define a minimum and maximum (used for the randomized combat delays). The minimum can never cross the maximum.</li>
+            <li><strong>Mode</strong> — a dropdown with the available options.</li>
+            <li><strong>Color</strong> — a color picker with alpha for theme colors.</li>
+            <li><strong>Keybind</strong> — click the row, press a key (or a mouse button), press <span class="kbd">Esc</span> to cancel recording, or use Clear to unbind.</li>
+            <li><strong>Action</strong> — a button that triggers something (e.g. reset functions in Client Settings).</li>
+          </ul>
+          <p>Settings with a description show it as a tooltip on hover. Every control writes directly into the client's real configuration — nothing is cosmetic.</p>
+
+          <h2 id="modules">Modules</h2>
+          <h3>MaceSwitch (Combat)</h3>
+          <p>The core module. When enabled, it detects a player roughly three blocks below you (configurable height and tolerance) within your configured reach, then runs a non-blocking sequence: equip chestplate → switch to mace → attack. All three delays are randomized inside configurable ranges, the target is re-validated right before the attack, and the sequence aborts safely if the world, your state or the target changes.</p>
+          <h3>Sprint (Movement)</h3>
+          <p>Sprint helper with Legit/Rage modes, omnidirectional sprinting, keep-sprint and a forward-requirement option.</p>
+          <div class="callout"><p><strong>Note:</strong> ESP, Fullbright, HUD, Speed, Step, AutoGG and NoRotate are currently placeholders without active behavior and expose no settings.</p></div>
+
+          <h2 id="hud">HUD</h2>
+          <p>The HUD shows the <strong>watermark</strong>, <strong>FPS</strong>, <strong>coordinates</strong>, <strong>speed</strong> and <strong>active modules</strong>. Open the editor with <span class="kbd">F8</span> to move, scale, recolor, rename, show or hide each element — or reset an element to its default. Your layout persists across restarts.</p>
+
+          <h2 id="keybinds">Keybinds</h2>
+          <p>By default only the GUI has a keybind (<span class="kbd">Right Shift</span>); every module starts unbound. Click a module's keybind row in the ClickGUI to record a key or mouse button. If the key is already used by another module you'll get a warning notification. The GUI keybind can be changed but never cleared to nothing, so you can't lock yourself out.</p>
+
+          <h2 id="config">Config &amp; Profiles</h2>
+          <p>All settings live in <code>.minecraft/config/aerialmace.json</code> (client/combat state) and <code>.minecraft/config/aerialmace-gui.json</code> (GUI, HUD, friends, keybinds). Configs are saved with a short delay after changes — not on every tick — and rotating backups (<code>.bak</code> files) are kept so a corrupted file can't destroy your setup.</p>
+          <p>Profiles (F6) store complete config snapshots: create, save, load, rename (press <span class="kbd">R</span> and type a name) or delete them. A corrupt profile is skipped safely instead of breaking the client.</p>
+
+          <h2 id="cloud">Cloud Configs</h2>
+          <p>Press <span class="kbd">F9</span> to open cloud configs. Upload your current client config under a name, or browse and download configs shared by other players. Uploaded configs contain gameplay settings only — cloud connection details are never included. The public server rate-limits uploads per author and automatically prunes old entries; no account is needed.</p>
+
+          <h2 id="friends">Friends</h2>
+          <p>Manage friends with <span class="kbd">F7</span>: add by name, remove, list. With <strong>Ignore Friends</strong> enabled in the combat settings, friends are never selected as targets by the MaceSwitch module.</p>
+
+          <h2 id="themes">Themes</h2>
+          <p>In <strong>Client Settings</strong> you can change the accent, background, panel, module-active, text, secondary-text, border and hover colors with a live color picker. Everything in the GUI and HUD follows your theme instantly and persists.</p>
+
+          <h2 id="troubleshooting">Troubleshooting</h2>
+          <ul>
+            <li><strong>Config looks wrong after a crash</strong> — delete the affected file in <code>.minecraft/config/</code>; the client regenerates defaults, and a <code>.bak</code> backup may still hold your settings.</li>
+            <li><strong>A setting seems stuck</strong> — use "Reset Module Settings" or "Reset Everything" in Client Settings. "Reset Everything" asks for a confirmation click first.</li>
+            <li><strong>Check your setup</strong> — the debug overlay (<span class="kbd">F10</span>) shows config dirty state, versions and the combat state machine phase.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/img/icon-192.png" alt="Gugugaga Client logo" width="34" height="34">
+          <p><strong>Gugugaga Client</strong> v1.1.1 for Minecraft 1.21.11 (Fabric). Free, open source, MIT licensed.</p>
+        </div>
+        <div class="footer-col">
+          <h3>Product</h3>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="download.html">Download</a></li>
+            <li><a href="changelog.html">Changelog</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="documentation.html">Documentation</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="https://github.com/fakten60-svg/gugugaga-client/issues" rel="noopener">Report an issue</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Community</h3>
+          <ul>
+            <li><a href="https://github.com/fakten60-svg/gugugaga-client" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/fakten60-svg/gugugaga-client/releases" rel="noopener">Releases</a></li>
+            <li><a href="https://github.com/fakten60-svg" rel="noopener">fakten60</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 fakten60. Gugugaga Client is not affiliated with Mojang or Microsoft.</span>
+        <span>Minecraft 1.21.11 · Fabric · Java 21</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

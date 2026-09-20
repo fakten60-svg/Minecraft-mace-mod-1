@@ -77,6 +77,12 @@ GitHub Actions und hängt die fertige JAR automatisch ans Release. Die Version s
 [`gradle.properties`](gradle.properties). Jeder Push auf `main` wird zusätzlich durch
 CI geprüft.
 
+## Website
+
+Das Projekt hat eine eigene statische Website im Ordner [`website/`](website/)
+(Home, Features, Download, Dokumentation, Changelog, FAQ) — kein Build-Step,
+keine Abhängigkeiten. Details: [`website/README.md`](website/README.md).
+
 ## Technik
 
 Minecraft 1.21.11 · Fabric Loader ≥ 0.19.5 · Fabric API 0.141.6+1.21.11 ·
