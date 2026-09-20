@@ -1,4 +1,4 @@
-# Aerial Mace Automation
+# Gugugaga Client
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-green)](https://minecraft.net)
 [![Fabric](https://img.shields.io/badge/Fabric-0.141.6%2B1.21.11-blue)](https://fabricmc.net)
@@ -86,11 +86,11 @@ konfiguriert werden.
 
 ### ClickGUI
 
-![AerialMace ClickGUI](docs/screenshots/clickgui.svg)
+![Gugugaga Client ClickGUI](docs/screenshots/clickgui.svg)
 
 ### HUD-Editor und Overlay
 
-![AerialMace HUD Editor](docs/screenshots/hud-editor.svg)
+![Gugugaga Client HUD Editor](docs/screenshots/hud-editor.svg)
 
 ## Installation (für Spieler)
 
@@ -278,8 +278,13 @@ Releases laufen davon unabhängig weiter wie bisher.
 1. Projekt bei Supabase anlegen.
 2. SQL aus [`docs/supabase-cloud-configs.sql`](docs/supabase-cloud-configs.sql) im SQL-Editor ausführen.
    Das legt die Tabelle `aerialmace_configs` und die Policies an: anonymes Lesen und anonymes
-   Hochladen erlaubt, Ändern und Löschen nicht.
+   Hochladen erlaubt, Ändern und Löschen nicht – inklusive Upload-Drossel und automatischer
+   Aufräum-Trigger (siehe Sicherheit).
 3. Project URL und den öffentlichen **anon key** notieren.
+
+Das reicht komplett: Der **Supabase Free Plan** (kostenlos, keine Kreditkarte) enthält 500 MB
+Datenbank und 5 GB Traffic/Monat. Die Tabelle wird durch die unten beschriebenen Limits dauerhaft
+auf ca. **16 MB** begrenzt – die Cloud bleibt damit dauerhaft kostenlos betreibbar.
 
 ### Nutzung (im Spiel)
 
@@ -299,7 +304,22 @@ lädt die jeweilige Cloud-Config herunter und übernimmt sie sofort. **R** aktua
 - Es wird nichts hochgeladen, ohne dass du ENTER drückst.
 - Beim Upload werden nur Gameplay-Werte geteilt. URLs, Keys und Cloud-Schalter bleiben lokal.
 - Heruntergeladene Configs können die Cloud-Einstellungen nicht verändern (kein Redirect).
-- Nur HTTPS, begrenzte Antwortgröße, alles asynchron, Offline-Betrieb bleibt möglich.
+- Nur HTTPS, begrenzte Antwortgröße (512 KB), alles asynchron, Offline-Betrieb bleibt möglich.
+
+**Schutz vor Missbrauch (z. B. Zip-Bomben oder Flood):**
+
+- Über die Cloud wandert ausschließlich JSON – niemals Archive/Dateien. Eine Zip-Bombe kann
+  hochgeladen oder heruntergeladen prinzipiell nicht entstehen; der Server akzeptiert pro Zeile
+  max. **32 KB** JSON und nur ein einzelnes JSON-Objekt.
+- **Drossel:** Max. **5 Uploads pro Autorenname pro Minute** (direkt in der INSERT-Policy).
+- **Begrenzte Tabelle:** Nach jedem Upload räumt ein Trigger automatisch auf und behält nur die
+  **neuesten 500 Zeilen**. Die Tabelle kann dadurch nie größer als ~16 MB werden – die Cloud
+  kann weder mit Spam vollgemüllt noch das Free-Trial-Limit gesprengt werden.
+- **Kein Manipulieren:** RLS erlaubt über den anon key ausschließlich Lesen und Hochladen.
+  Update und Delete sind technisch ausgeschlossen.
+- **Client-seitig:** Jede Antwort wird bei 512 KB abgeschnitten und abgelehnt, das JSON-Parsing
+  ist gegen tief verschachtelte „JSON-Bomben“ geschützt (Nesting-Limit + Guard), und jeder
+  angezeigte String wird auf 48 Zeichen begrenzt, bevor er gerendert wird.
 
 ## Releases
 

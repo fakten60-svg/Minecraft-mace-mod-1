@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import de.aerialmace.config.ModConfig;
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleManager;
 
@@ -171,7 +172,7 @@ public final class HudManager {
 	/** Client name / watermark. Its text can be renamed in the HUD editor. */
 	static final class WatermarkElement extends LabeledElement {
 
-		private String text = "AerialMace";
+		private String text = ModConfig.CLIENT_NAME;
 
 		WatermarkElement(int x, int y) {
 			super("Watermark", x, y, false, 1);
@@ -200,7 +201,7 @@ public final class HudManager {
 		@Override
 		public void setEditableText(String value) {
 			String trimmed = value == null ? "" : value.trim();
-			this.text = trimmed.isEmpty() ? "AerialMace" : trimmed.substring(0, Math.min(32, trimmed.length()));
+			this.text = trimmed.isEmpty() ? ModConfig.CLIENT_NAME : trimmed.substring(0, Math.min(32, trimmed.length()));
 		}
 
 		@Override
@@ -220,7 +221,7 @@ public final class HudManager {
 		@Override
 		public void reset() {
 			super.reset();
-			text = "AerialMace";
+			text = ModConfig.CLIENT_NAME;
 		}
 	}
 

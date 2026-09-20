@@ -313,14 +313,14 @@ public final class SequenceStateMachine {
 		}
 		if (client != null && client.player != null && config.overlayMessages) {
 			client.inGameHud.setOverlayMessage(
-					Text.literal("§c[AerialMace] §7Abgebrochen: §f" + reason), false);
+					Text.literal("§c[" + ModConfig.CLIENT_NAME + "] §7Abgebrochen: §f" + reason), false);
 		}
 		reset();
 	}
 
 	private void showStatus(MinecraftClient client, String message) {
 		if (client != null && client.player != null && config.overlayMessages) {
-			client.inGameHud.setOverlayMessage(Text.literal("§b[AerialMace] §f" + message), false);
+			client.inGameHud.setOverlayMessage(Text.literal("§b[" + ModConfig.CLIENT_NAME + "] §f" + message), false);
 		}
 	}
 

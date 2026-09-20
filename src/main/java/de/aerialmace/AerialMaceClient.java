@@ -86,7 +86,7 @@ public class AerialMaceClient implements ClientModInitializer {
 			HudManager.save();
 		});
 
-		LOGGER.info("Aerial Mace Automation initialized (enabled: {})", config.enabled);
+		LOGGER.info("{} initialized (enabled: {})", ModConfig.CLIENT_NAME, config.enabled);
 	}
 
 	private void onEndClientTick(MinecraftClient client) {

@@ -1,5 +1,7 @@
 package de.aerialmace.hud;
 
+import de.aerialmace.config.ModConfig;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
@@ -30,7 +32,7 @@ public final class HudEditorScreen extends Screen {
 	private String renameBuffer = "";
 
 	public HudEditorScreen() {
-		super(Text.literal("AerialMace HUD Editor"));
+		super(Text.literal(ModConfig.CLIENT_NAME + " - HUD Editor"));
 	}
 
 	@Override

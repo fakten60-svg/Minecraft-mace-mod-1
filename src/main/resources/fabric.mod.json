@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "aerialmace",
 	"version": "${version}",
-	"name": "Aerial Mace Automation",
+	"name": "Gugugaga Client",
 	"description": "Automated client-side aerial mace sequence: equips a chestplate, switches to a mace and attacks a player roughly three blocks below.",
 	"authors": [
 		"fakten60"

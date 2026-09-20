@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.aerialmace.config.ConfigManager;
+import de.aerialmace.config.ModConfig;
 import de.aerialmace.module.ModuleCategory;
 import de.aerialmace.module.ModuleManager;
 import de.aerialmace.module.setting.KeybindSetting;
@@ -44,7 +45,7 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	private long confirmResetUntilMs;
 
 	public ClickGuiScreen() {
-		super(Text.literal("AerialMace ClickGUI"));
+		super(Text.literal(ModConfig.CLIENT_NAME + " ClickGUI"));
 	}
 
 	@Override
