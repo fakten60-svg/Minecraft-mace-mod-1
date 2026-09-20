@@ -14,6 +14,7 @@ public abstract class Setting {
 
 	private final String name;
 	private final List<Runnable> listeners = new ArrayList<>();
+	private String description;
 
 	protected Setting(String name) {
 		this.name = name;
@@ -21,6 +22,24 @@ public abstract class Setting {
 
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Short human-readable explanation shown as a tooltip in the GUI. Optional; returns
+	 * null for settings without a description.
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Sets the tooltip text and returns this setting with its concrete type, so module
+	 * registrations can chain the call fluently.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends Setting> T describe(String description) {
+		this.description = description;
+		return (T) this;
 	}
 
 	public void addListener(Runnable listener) {

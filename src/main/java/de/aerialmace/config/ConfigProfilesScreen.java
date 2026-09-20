@@ -1,5 +1,8 @@
 package de.aerialmace.config;
 
+import de.aerialmace.notification.NotificationManager;
+import de.aerialmace.notification.NotificationType;
+
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -15,7 +18,7 @@ public final class ConfigProfilesScreen extends Screen {
     @Override public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         context.fill(0, 0, width, height, 0xD0101014);
         context.drawText(textRenderer, "Config Profiles", 20, 18, 0xFFFFFFFF, true);
-        context.drawText(textRenderer, "N + name = create/save | ENTER = load | S = save | D = delete | ESC", 20, 34, 0xFFAAAAAA, false);
+        context.drawText(textRenderer, "N + name = create/save | ENTER = load | S = save | R + name = rename | D = delete | ESC", 20, 34, 0xFFAAAAAA, false);
         context.drawText(textRenderer, "Input: " + input, 20, 52, 0xFF60A5FA, false);
         int y = 78;
         for (String profile : ConfigManager.listProfiles()) {
@@ -31,10 +34,42 @@ public final class ConfigProfilesScreen extends Screen {
         int key = event.getKeycode();
         if (key == GLFW.GLFW_KEY_ESCAPE) { close(); return true; }
         if (key == GLFW.GLFW_KEY_BACKSPACE && !input.isEmpty()) { input = input.substring(0, input.length() - 1); return true; }
-        if (key == GLFW.GLFW_KEY_N && !input.isBlank()) { selected = input; ConfigManager.saveProfile(selected); input = ""; return true; }
-        if (key == GLFW.GLFW_KEY_S) { ConfigManager.saveProfile(selected); return true; }
-        if (key == GLFW.GLFW_KEY_ENTER) { ConfigManager.loadProfile(selected); return true; }
-        if (key == GLFW.GLFW_KEY_D) { ConfigManager.deleteProfile(selected); selected = "default"; return true; }
+        if (key == GLFW.GLFW_KEY_N && !input.isBlank()) {
+            selected = input;
+            if (ConfigManager.saveProfile(selected)) {
+                NotificationManager.notify(NotificationType.SUCCESS, "Profile saved", selected);
+            }
+            input = ""; return true;
+        }
+        if (key == GLFW.GLFW_KEY_S) {
+            if (ConfigManager.saveProfile(selected)) {
+                NotificationManager.notify(NotificationType.SUCCESS, "Profile saved", selected);
+            }
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_ENTER) {
+            if (ConfigManager.loadProfile(selected)) {
+                NotificationManager.notify(NotificationType.SUCCESS, "Profile loaded", selected);
+            } else {
+                NotificationManager.notify(NotificationType.ERROR, "Profile not found", selected);
+            }
+            return true;
+        }
+        if (key == GLFW.GLFW_KEY_R && !input.isBlank()) {
+            if (ConfigManager.renameProfile(selected, input)) {
+                NotificationManager.notify(NotificationType.SUCCESS, "Profile renamed", selected + " -> " + input);
+                selected = input;
+            } else {
+                NotificationManager.notify(NotificationType.ERROR, "Rename failed", selected);
+            }
+            input = ""; return true;
+        }
+        if (key == GLFW.GLFW_KEY_D) {
+            if (ConfigManager.deleteProfile(selected)) {
+                NotificationManager.notify(NotificationType.INFO, "Profile deleted", selected);
+            }
+            selected = "default"; return true;
+        }
         return super.keyPressed(event);
     }
     @Override public boolean mouseClicked(Click click, boolean doubled) {

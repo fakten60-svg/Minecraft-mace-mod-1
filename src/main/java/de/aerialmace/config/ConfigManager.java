@@ -35,6 +35,10 @@ import net.fabricmc.loader.api.FabricLoader;
 public final class ConfigManager {
 
 	public static final String CONFIG_FILE_NAME = "aerialmace-gui.json";
+	/** Current format version; older files are migrated on load instead of being discarded. */
+	public static final int CONFIG_VERSION = 1;
+	/** Maximum number of rotating backups kept next to the config file. */
+	private static final int MAX_BACKUPS = 3;
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -43,6 +47,35 @@ public final class ConfigManager {
 
 	private static Path configPath() {
 		return FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE_NAME);
+	}
+
+	/** Rotating backup path: {@code aerialmace-gui.json.bak.<n>} with n in 1..MAX_BACKUPS. */
+	private static Path backupPath(int index) {
+		return FabricLoader.getInstance().getConfigDir().resolve(CONFIG_FILE_NAME + ".bak." + index);
+	}
+
+	/**
+	 * Rotates the backups before an overwrite: newest backup becomes .bak.1, the oldest
+	 * one is deleted. The total number of backups stays bounded.
+	 */
+	private static void rotateBackups() {
+		for (int index = MAX_BACKUPS; index > 1; index--) {
+			Path previous = backupPath(index - 1);
+			if (Files.exists(previous)) {
+				try {
+					Files.move(previous, backupPath(index), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					de.aerialmace.debug.ClientLogger.warn("Could not rotate config backup " + index, e);
+				}
+			}
+		}
+		if (Files.exists(configPath())) {
+			try {
+				Files.copy(configPath(), backupPath(1), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				de.aerialmace.debug.ClientLogger.warn("Could not create config backup", e);
+			}
+		}
 	}
 
 	private static Path profilesPath() {
@@ -82,6 +115,46 @@ public final class ConfigManager {
 		catch (IOException ignored) { return false; }
 	}
 
+	/**
+	 * Renames a profile file. Fails when the source does not exist, the target already
+	 * exists, or both names normalize to the same file.
+	 */
+	public static synchronized boolean renameProfile(String oldName, String newName) {
+		String safeOld = safeProfileName(oldName);
+		String safeNew = safeProfileName(newName);
+		if (safeOld.equals(safeNew)) {
+			return false;
+		}
+		Path source = profilesPath().resolve(safeOld + ".json");
+		Path target = profilesPath().resolve(safeNew + ".json");
+		if (!Files.exists(source) || Files.exists(target)) {
+			return false;
+		}
+		try {
+			Files.move(source, target);
+			return true;
+		} catch (IOException e) {
+			de.aerialmace.debug.ClientLogger.warn("Could not rename profile '" + safeOld + "'", e);
+			return false;
+		}
+	}
+
+	/**
+	 * Copies an existing file to a single {@code .bak} next to it. Shared by the config
+	 * owners (combat config, HUD layout, friends) that write rarely; the GUI config uses
+	 * the rotating {@link #rotateBackups()} scheme instead.
+	 */
+	public static void copyToBackup(Path source, Path backup) {
+		if (!Files.exists(source)) {
+			return;
+		}
+		try {
+			Files.copy(source, backup, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			de.aerialmace.debug.ClientLogger.warn("Could not create backup of " + source.getFileName(), e);
+		}
+	}
+
 	public static synchronized List<String> listProfiles() {
 		List<String> result = new ArrayList<>();
 		if (!Files.isDirectory(profilesPath())) return result;
@@ -116,6 +189,15 @@ public final class ConfigManager {
 			return;
 		}
 
+		int fileVersion = root.has("configVersion") && root.get("configVersion").isJsonPrimitive()
+				? root.get("configVersion").getAsInt() : 0;
+		if (fileVersion > CONFIG_VERSION) {
+			de.aerialmace.debug.ClientLogger.warn("Config written by a newer client version (" + fileVersion
+					+ " > " + CONFIG_VERSION + "); loading with defaults where unknown.");
+		}
+		// Migration hook: apply version-by-version transforms before reading the values.
+		root = migrate(root, fileVersion);
+
 		loading = true;
 		try {
 			loadModules(root);
@@ -141,10 +223,24 @@ public final class ConfigManager {
 			// load, a profile switch or an applied cloud config.
 			refreshModuleValues();
 		} catch (RuntimeException e) {
-			// A partially loaded config is still usable; defaults fill the gaps.
+			de.aerialmace.debug.ClientLogger.warn("GUI config partially unreadable; defaults fill the gaps", e);
+			de.aerialmace.notification.NotificationManager.notify(
+					de.aerialmace.notification.NotificationType.WARNING, "Config problem",
+					"Some settings could not be loaded");
 		} finally {
 			loading = false;
 		}
+	}
+
+	/**
+	 * Applies format migrations step by step. Version 1 is the current layout; version 0
+	 * (files before the version field existed) is structurally identical, so no transform
+	 * is needed yet - future migrations chain from here in clear, separate steps.
+	 */
+	private static JsonObject migrate(JsonObject root, int fileVersion) {
+		// Example for a future change:
+		// if (fileVersion < 2) { root.add("newField", ...); fileVersion = 2; }
+		return root;
 	}
 
 	private static void loadModules(JsonObject root) {
@@ -220,6 +316,11 @@ public final class ConfigManager {
 		dirtyAtMs = System.currentTimeMillis();
 	}
 
+	/** True while unsaved changes are pending (used by the debug overlay). */
+	public static boolean isDirty() {
+		return dirty;
+	}
+
 	/** Called once per client tick: writes at most once per {@link #AUTO_SAVE_DELAY_MS}. */
 	public static void flushPending() {
 		if (!dirty || System.currentTimeMillis() - dirtyAtMs < AUTO_SAVE_DELAY_MS) {
@@ -286,13 +387,16 @@ public final class ConfigManager {
 		theme.add("hover", ThemeManager.get().hover().toJson());
 		root.add("theme", theme);
 
+		root.addProperty("configVersion", CONFIG_VERSION);
+
 		try {
 			Files.createDirectories(configPath().getParent());
+			rotateBackups();
 			try (Writer writer = Files.newBufferedWriter(configPath())) {
 				GSON.toJson(root, writer);
 			}
 		} catch (IOException e) {
-			// ignore
+			de.aerialmace.debug.ClientLogger.warn("Could not save GUI config", e);
 		}
 	}
 

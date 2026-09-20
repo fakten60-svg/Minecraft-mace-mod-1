@@ -57,6 +57,7 @@ public class KeybindComponent extends SettingComponent {
 		if (recording && hovered && click.button() > 1) {
 			keybind.setKey(KeybindSetting.MOUSE_FLAG | click.button());
 			recording = false;
+			reportConflict();
 			callback.markDirty();
 			callback.playClick();
 			return true;
@@ -94,9 +95,32 @@ public class KeybindComponent extends SettingComponent {
 		}
 		keybind.setKey(keyCode);
 		recording = false;
+		reportConflict();
 		callback.markDirty();
 		callback.playClick();
 		return true; // consume everything while recording
+	}
+
+	/**
+	 * Informs the user when the just-assigned key is already bound to another module -
+	 * the assignment stays valid (first module wins when polled), but the overlap must be
+	 * visible instead of silently swallowed.
+	 */
+	private void reportConflict() {
+		var conflicts = de.aerialmace.module.ModuleManager.getConflictingModules(keybind.getKey());
+		if (conflicts.isEmpty()) {
+			return;
+		}
+		StringBuilder names = new StringBuilder();
+		for (de.aerialmace.module.Module module : conflicts) {
+			if (names.length() > 0) {
+				names.append(", ");
+			}
+			names.append(module.getName());
+		}
+		de.aerialmace.notification.NotificationManager.notify(
+				de.aerialmace.notification.NotificationType.WARNING, "Keybind conflict",
+				names + " share " + keybind.getKeyName());
 	}
 
 	/** Ends recording without changing the bind (click landed elsewhere). */

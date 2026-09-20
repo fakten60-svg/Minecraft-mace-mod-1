@@ -59,6 +59,7 @@ Selbst bauen: `./gradlew build` (JDK 21), JAR liegt unter `build/libs/`.
 | **F7** | Friends-Manager |
 | **F8** | HUD-Editor |
 | **F9** | Cloud-Configs |
+| **F10** | Debug-Overlay (FPS, Versionen, Config-Status) |
 
 ## Cloud-Configs
 

@@ -74,6 +74,22 @@ public class ModuleComponent {
 		return height;
 	}
 
+	/**
+	 * The hovered setting while the module's settings are expanded, for tooltips; null
+	 * when the settings are collapsed or the mouse is on the module header.
+	 */
+	public Setting findHoveredSetting(double mouseX, double mouseY) {
+		if (expandAnim.value() < 0.9f || mouseY <= y + HEADER_HEIGHT) {
+			return null;
+		}
+		for (SettingComponent component : settingComponents) {
+			if (component.isHoveredAt(mouseX, mouseY)) {
+				return component.getSetting();
+			}
+		}
+		return null;
+	}
+
 	public void update(float deltaSeconds) {
 		expandAnim.update(deltaSeconds);
 		toggleAnim.update(deltaSeconds);

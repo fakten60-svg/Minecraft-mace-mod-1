@@ -67,6 +67,7 @@ public final class HudManager {
 	public static void save() {
 		try {
 			Files.createDirectories(FILE.getParent());
+			de.aerialmace.config.ConfigManager.copyToBackup(FILE, FILE.resolveSibling(FILE.getFileName() + ".bak"));
 			JsonObject root = new JsonObject();
 			for (HudElement element : ELEMENTS) {
 				JsonObject value = new JsonObject();
