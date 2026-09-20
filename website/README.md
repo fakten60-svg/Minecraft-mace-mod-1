@@ -59,6 +59,9 @@ A global search for `fakten60-svg.github.io/gugugaga-client` finds every occurre
 
 ## Deploy
 
-Any static host works — e.g. GitHub Pages by serving this folder as the site root, or
-Netlify/Vercel with "publish directory" = `website`. Set the final domain as described
-under *Central configuration*.
+**Live: https://fakten60-svg.github.io/gugugaga-client/** — deployed automatically by
+`.github/workflows/pages.yml` (GitHub Actions deployment mode) whenever a push to `main`
+touches `website/`. Manual runs: `gh workflow run pages.yml`.
+
+Other static hosts work too (Netlify/Vercel with "publish directory" = `website`). Set
+the final domain as described under *Central configuration*.
