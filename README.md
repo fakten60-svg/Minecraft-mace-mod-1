@@ -81,7 +81,11 @@ CI geprüft.
 
 Das Projekt hat eine eigene statische Website im Ordner [`website/`](website/)
 (Home, Features, Download, Dokumentation, Changelog, FAQ) — kein Build-Step,
-keine Abhängigkeiten. Details: [`website/README.md`](website/README.md).
+keine Abhängigkeiten.
+
+**Live:** <https://fakten60-svg.github.io/gugugaga-client/> — Änderungen an
+`website/` werden automatisch per GitHub Actions deployt.
+Details: [`website/README.md`](website/README.md).
 
 ## Technik
 
