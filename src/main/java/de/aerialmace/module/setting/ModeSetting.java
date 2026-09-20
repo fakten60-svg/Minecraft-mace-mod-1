@@ -23,7 +23,10 @@ public class ModeSetting extends Setting {
 		this.options = options;
 		this.defaultValue = defaultValue;
 		this.writer = writer;
-		this.value = options.contains(defaultValue) ? defaultValue : options.get(0);
+		// An empty option list must not crash the constructor: keep the default as-is and
+		// let setValue/cycle be no-ops until a real option list arrives.
+		this.value = options.contains(defaultValue) ? defaultValue
+				: (options.isEmpty() ? defaultValue : options.get(0));
 	}
 
 	public List<String> getOptions() {
