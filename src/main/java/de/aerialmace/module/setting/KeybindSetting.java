@@ -96,7 +96,16 @@ public class KeybindSetting extends Setting {
 			case 265 -> "Up";
 			case 32 -> "Space";
 			case 335 -> "Keypad Enter";
+			case 258 -> "Tab";
+			case 260 -> "Insert";
+			case 266 -> "Page Up";
+			case 267 -> "Page Down";
+			case 268 -> "Home";
+			case 269 -> "End";
 			default -> {
+				if (keyCode >= 290 && keyCode <= 301) {
+					yield "F" + (keyCode - 289); // F1 - F12
+				}
 				if (keyCode >= 32 && keyCode <= 126) {
 					yield String.valueOf((char) keyCode).toUpperCase();
 				}

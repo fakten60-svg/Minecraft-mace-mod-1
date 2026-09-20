@@ -41,12 +41,4 @@ public final class ModuleManager {
 		return false;
 	}
 
-	public static Module getByName(String name) {
-		for (Module module : MODULES) {
-			if (module.getName().equalsIgnoreCase(name)) {
-				return module;
-			}
-		}
-		return null;
-	}
 }

@@ -29,7 +29,11 @@ public class SliderActionComponent extends SettingComponent {
 		boolean hovered = isHovered(mouseX, mouseY, getHeight());
 		context.fill(x, y, x + width, y + getHeight(),
 				hovered ? ThemeManager.withAlpha(theme.accent().getColor(), 0x30) : 0x00000000);
-		context.drawText(textRenderer, "↺  " + setting.getName(), x + PADDING, y + (ROW_HEIGHT - 8) / 2,
+		String label = action.getDisplayName();
+		if (textRenderer.getWidth("↺  " + label) > width - PADDING) {
+			label = action.getName();
+		}
+		context.drawText(textRenderer, "↺  " + label, x + PADDING, y + (ROW_HEIGHT - 8) / 2,
 				hovered ? theme.accent().getColor() : theme.secondaryText().getColor(), false);
 	}
 

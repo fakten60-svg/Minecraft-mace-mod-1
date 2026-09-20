@@ -64,7 +64,9 @@ public class ClientSettingsModule extends Module {
 		addSetting(new KeybindSetting("GUI Keybind", DEFAULT_GUI_KEY) {
 			@Override
 			public void setKey(int newKey) {
-				super.setKey(newKey);
+				// The ClickGUI has to stay reachable: clearing the bind (NONE) would lock the
+				// GUI away for good, so it falls back to the default Right Shift.
+				super.setKey(newKey == NONE ? DEFAULT_GUI_KEY : newKey);
 				state.guiKey = getKey();
 			}
 		});

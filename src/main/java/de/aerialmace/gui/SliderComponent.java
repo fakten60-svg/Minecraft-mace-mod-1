@@ -37,7 +37,7 @@ public class SliderComponent extends SettingComponent {
 		int barY = y + 13;
 		int barX = x + PADDING;
 		int barW = width - PADDING * 2;
-		context.fill(barX, barY, barX + barW, barY + 3, 0xFF0B0B0E);
+		context.fill(barX, barY, barX + barW, barY + 3, theme.track());
 		float fraction = (float) ((slider.getValue() - slider.getMin())
 				/ (slider.getMax() - slider.getMin()));
 		int fillW = Math.round(barW * fraction);

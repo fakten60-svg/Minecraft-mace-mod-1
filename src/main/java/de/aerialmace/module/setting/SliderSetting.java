@@ -8,6 +8,9 @@ import com.google.gson.JsonPrimitive;
 /**
  * Single-value slider setting. {@code writer} receives the snapped value and writes it
  * straight into the backing configuration.
+ *
+ * <p>The writer is only called on real changes: constructing a setting has no side effect on
+ * the backing configuration, so the owner decides when the initial value is written.
  */
 public class SliderSetting extends Setting {
 
@@ -24,12 +27,16 @@ public class SliderSetting extends Setting {
 		super(name);
 		this.min = min;
 		this.max = max;
-		this.step = step;
+		this.step = Math.max(0.0001, step);
 		this.defaultValue = defaultValue;
 		this.unit = unit;
 		this.writer = writer;
-		this.value = defaultValue;
-		writer.accept(value, value);
+		this.value = snapInBounds(defaultValue);
+	}
+
+	/** Snaps a value to the step and clamps it into the slider bounds. */
+	private double snapInBounds(double value) {
+		return Math.max(min, Math.min(max, Math.round(value / step) * step));
 	}
 
 	public double getMin() {
@@ -57,8 +64,7 @@ public class SliderSetting extends Setting {
 	}
 
 	public void setValue(double newValue) {
-		double snapped = Math.round(newValue / step) * step;
-		snapped = Math.max(min, Math.min(max, snapped));
+		double snapped = snapInBounds(newValue);
 		if (this.value != snapped) {
 			this.value = snapped;
 			writer.accept(snapped, snapped);

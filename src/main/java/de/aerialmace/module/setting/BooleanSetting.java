@@ -8,6 +8,8 @@ import com.google.gson.JsonPrimitive;
 /**
  * Boolean toggle. An optional {@code writer} forwards changes to the backing
  * configuration so the GUI never keeps parallel state.
+ *
+ * <p>The writer is only called on real changes (construction has no side effect).
  */
 public class BooleanSetting extends Setting {
 
@@ -24,9 +26,6 @@ public class BooleanSetting extends Setting {
 		this.defaultValue = defaultValue;
 		this.writer = writer;
 		this.value = defaultValue;
-		if (writer != null) {
-			writer.accept(value);
-		}
 	}
 
 	public boolean getValue() {

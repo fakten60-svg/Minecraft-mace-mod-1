@@ -51,16 +51,6 @@ public final class Animation {
 		this.progress = open ? 1.0f : 0.0f;
 	}
 
-	/** True while a transition is still running. */
-	public boolean isAnimating() {
-		return Math.abs((open ? 1.0f : 0.0f) - progress) > 0.002f;
-	}
-
-	/** True once the close animation has finished. */
-	public boolean isClosed() {
-		return !open && progress <= 0.001f;
-	}
-
 	/** Current 0..1 progress (smoothed). */
 	public float value() {
 		return progress;
@@ -72,11 +62,4 @@ public final class Animation {
 		return t * t * (3 - 2 * t);
 	}
 
-	/** Spring-like bounce for toggle knobs. */
-	public static float easeOutBack(float t) {
-		t = Math.max(0.0f, Math.min(1.0f, t));
-		float c1 = 1.70158f;
-		float c3 = c1 + 1;
-		return 1 + c3 * (t - 1) * (t - 1) * (t - 1) + c1 * (t - 1) * (t - 1);
-	}
 }

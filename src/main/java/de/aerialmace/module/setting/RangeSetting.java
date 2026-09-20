@@ -9,6 +9,12 @@ import com.google.gson.JsonObject;
  * Range setting with an independent minimum and maximum (e.g. random delay bounds).
  * The GUI renders it as a bar with two draggable handles; both writes go straight into
  * the backing configuration, so the combat logic uses the new bounds immediately.
+ *
+ * <p>The two values are always clamped into {@code [min, max]} and the minimum can never
+ * cross the maximum, so a hand-edited or outdated config file can neither push a handle off
+ * the bar nor produce a reversed range. The writer is never called from the constructor —
+ * the owner decides when the initial value is written, which keeps the backing config free
+ * of side effects during GUI construction.
  */
 public class RangeSetting extends Setting {
 
@@ -27,14 +33,15 @@ public class RangeSetting extends Setting {
 		super(name);
 		this.min = min;
 		this.max = max;
-		this.step = step;
-		this.defaultMin = defaultMin;
-		this.defaultMax = defaultMax;
+		this.step = Math.max(0.0001, step);
+		// Values coming from a config file may lie outside the GUI range, so clamp the
+		// defaults as well: the handles can then never leave the track.
+		this.defaultMin = snapInBounds(defaultMin);
+		this.defaultMax = Math.max(this.defaultMin, snapInBounds(defaultMax));
 		this.unit = unit;
 		this.writer = writer;
-		this.minValue = defaultMin;
-		this.maxValue = defaultMax;
-		writer.accept((int) Math.round(minValue), (int) Math.round(maxValue));
+		this.minValue = this.defaultMin;
+		this.maxValue = this.defaultMax;
 	}
 
 	public double getMin() {
@@ -69,27 +76,52 @@ public class RangeSetting extends Setting {
 		return unit;
 	}
 
-	private double snap(double v) {
-		return Math.round(v / step) * step;
+	private double snap(double value) {
+		return Math.round(value / step) * step;
+	}
+
+	/** Snaps a value to the step and clamps it into the GUI bounds. */
+	private double snapInBounds(double value) {
+		return Math.max(min, Math.min(max, snap(value)));
+	}
+
+	/**
+	 * Applies both bounds at once. Used when the backing configuration changed outside the
+	 * GUI (config load, profile switch, cloud config) so the handles show the live values.
+	 */
+	public void setRange(double newMin, double newMax) {
+		double lo = snapInBounds(newMin);
+		double hi = snapInBounds(newMax);
+		if (hi < lo) {
+			double swap = lo;
+			lo = hi;
+			hi = swap;
+		}
+		if (minValue != lo || maxValue != hi) {
+			minValue = lo;
+			maxValue = hi;
+			writer.accept(getIntMinValue(), getIntMaxValue());
+			fireChanged();
+		}
 	}
 
 	public void setMinValue(double newMin) {
-		newMin = Math.max(min, Math.min(max, snap(newMin)));
+		double snapped = snapInBounds(newMin);
 		// The minimum must never exceed the maximum.
-		newMin = Math.min(newMin, maxValue);
-		if (minValue != newMin) {
-			minValue = newMin;
+		snapped = Math.min(snapped, maxValue);
+		if (minValue != snapped) {
+			minValue = snapped;
 			writer.accept(getIntMinValue(), getIntMaxValue());
 			fireChanged();
 		}
 	}
 
 	public void setMaxValue(double newMax) {
-		newMax = Math.max(min, Math.min(max, snap(newMax)));
+		double snapped = snapInBounds(newMax);
 		// The maximum must never fall below the minimum.
-		newMax = Math.max(newMax, minValue);
-		if (maxValue != newMax) {
-			maxValue = newMax;
+		snapped = Math.max(snapped, minValue);
+		if (maxValue != snapped) {
+			maxValue = snapped;
 			writer.accept(getIntMinValue(), getIntMaxValue());
 			fireChanged();
 		}
@@ -97,10 +129,7 @@ public class RangeSetting extends Setting {
 
 	@Override
 	public void reset() {
-		minValue = defaultMin;
-		maxValue = defaultMax;
-		writer.accept(getIntMinValue(), getIntMaxValue());
-		fireChanged();
+		setRange(defaultMin, defaultMax);
 	}
 
 	@Override
@@ -115,12 +144,11 @@ public class RangeSetting extends Setting {
 	public void fromJson(JsonElement element) {
 		if (element != null && element.isJsonObject()) {
 			JsonObject object = element.getAsJsonObject();
-			if (object.has("max")) {
-				setMaxValue(object.get("max").getAsDouble());
-			}
-			if (object.has("min")) {
-				setMinValue(object.get("min").getAsDouble());
-			}
+			double storedMin = object.has("min") ? object.get("min").getAsDouble() : minValue;
+			double storedMax = object.has("max") ? object.get("max").getAsDouble() : maxValue;
+			// Applied in one step so a reversed pair from a hand-edited file is fixed up
+			// instead of being clamped one value at a time.
+			setRange(storedMin, storedMax);
 		}
 	}
 }

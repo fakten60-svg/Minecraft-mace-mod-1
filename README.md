@@ -56,7 +56,7 @@ Die Sequenz startet nur, wenn **alle** Bedingungen erfüllt sind:
 Die State Machine prüft vor **jedem** Übergang die Voraussetzungen neu und bricht sauber ab
 (Hotbar-Slot wird zurückgesetzt), wenn:
 
-- das Mod deaktiviert wird (Taste **M**),
+- die Mod deaktiviert wird (im ClickGUI oder über den selbst zugewiesenen Keybind),
 - der Spieler stirbt, in den Zuschauermodus wechselt oder die Welt verlässt,
 - das Ziel verschwindet, stirbt oder das Höhen-/Distanzfenster verlässt,
 - keine Mace in der Hotbar liegt,
@@ -143,7 +143,7 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 
 | Schlüssel | Bedeutung |
 | --- | --- |
-| `enabled` | Master-Schalter (auch in-game per Taste **M** umschaltbar) |
+| `enabled` | Master-Schalter (im ClickGUI oder über einen selbst zugewiesenen Keybind umschaltbar) |
 | `requireSneaking` | Sequenz nur starten, während gesneakt wird |
 | `ignoreFriends` | Friends aus der Zielauswahl ausschließen (Standard: true) |
 | `targetHeightMin/Max` | Toleranzfenster für `playerY - targetY` (Standard ≈ 3 Blöcke) |
@@ -159,7 +159,10 @@ Die Datei `config/aerialmace.json` wird beim ersten Start automatisch erzeugt:
 | `cloudShareKey` | öffentlicher Supabase anon key (kein Service-Key) |
 | `cloudAuthor` | Anzeigename beim Hochladen einer Cloud-Config |
 
-Kaputte oder fehlte Werte werden beim Start automatisch auf zulässige Bereiche korrigiert.
+Kaputte oder fehlende Werte werden beim Start automatisch auf zulässige Bereiche korrigiert. Eine
+beschädigte oder handeditierte GUI-Config (`aerialmace-gui.json`) kann den Client nicht crashen:
+unbekannte Keys werden ignoriert, falsch typisierte Werte übersprungen und fehlende Einstellungen mit
+ihren Defaults ergänzt.
 
 ## Steuerung & ClickGUI
 
@@ -178,27 +181,64 @@ ModuleManager geladen.
 - **Rechtsklick** auf ein Modul: Settings ein-/ausklappen
 - **Random-Delays** (Target Lock/Initial/Equip/Attack/Post-Attack) werden als **Range-Bar mit zwei Handles**
   dargestellt – beide Punkte sind einzeln verschiebbar, Min < Max wird erzwungen, und die
-  Combat-Logik übernimmt die Werte sofort.
+  Combat-Logik übernimmt die Werte sofort. Werte außerhalb der GUI-Grenzen (z. B. aus einer
+  handeditierten oder alten Config) werden beim Start sauber in den erlaubten Bereich gezogen,
+  statt die Handles aus der Bar zu schieben.
+- **Zielauswahl** über die Slider *Target Height* (Mitte), *Target Tolerance* (Fensterbreite),
+  *Max Distance* und *Max Horizontal Distance* – alle schreiben in dieselben Config-Werte, die
+  die Combat-Logik liest.
 - **Keybind-Zeile** in jedem Modul: Klick → „Press a key…“, Taste drücken zum Zuweisen,
-  **ESC** setzt zurück auf **NONE**. Module haben standardmäßig **keinen** Keybind.
+  **ESC** bricht die Aufnahme ab (der bisherige Bind bleibt), **Rechtsklick** setzt auf **NONE**
+  zurück. Eine mittlere Maustaste (bzw. Mouse 4/5) lässt sich während der Aufnahme ebenfalls
+  zuweisen. Module haben standardmäßig **keinen** Keybind; der GUI-Keybind fällt immer auf
+  RIGHT_SHIFT zurück, damit die GUI nie unerreichbar wird.
 - **Client-Settings-Panel**: GUI-Keybind, GUI-Scale, Animation Speed, Blur, Click Sounds,
   Button zum Öffnen der Cloud-Configs, Search Bar, Panel Borders und Theme
   (Dark/Midnight/Neon/Ocean/Mono). Der Color Picker bietet
-  Accent-, Background-, Panel-, Active-, Text-, Secondary-Text-, Border- und Hover-Farben sowie
-  Reset-Aktionen (Module Settings, Keybinds, Theme, GUI Layout).
+  Accent-, Background-, Panel-, Active-, Text-, Secondary-Text-, Border- und Hover-Farben.
+- **Während des Keybind-Aufnahmemodus besitzt die Tastatur der Aufnahme**: Tippen landet weder in
+  der Modulsuche noch in einem Modul.
+- **Keybind-Priorität:** Modul-Keybinds werden vor den festen Editor-Tasten (F6–F9) geprüft. Wer eine
+  dieser Tasten bewusst einem Modul zuweist, löst damit das Modul aus; ohne Zuweisung öffnen die
+  Tasten wie gewohnt die Editoren.
+- **Reset-Aktionen**: Module Settings (stellt die dokumentierten Standard-Timingwerte wieder her),
+  Keybinds (GUI → RIGHT_SHIFT, alle Module → NONE), Theme,
+  GUI-Layout (Panels **und** HUD-Positionen) sowie Reset Everything. Reset Everything verlangt einen
+  zweiten Klick zur Bestätigung und löscht **keine** Friends.
 - Panels lassen sich per Drag & Drop verschieben (Header), scrollen bei Überlauf,
   und Positionen/Einstellungen werden persistent gespeichert (`config/aerialmace-gui.json`).
 - Globale Suche: Im ClickGUI direkt tippen, um Module nach Name/Beschreibung zu filtern; ein rotes `!`
   markiert doppelte Modul-Keybinds.
 - **F9** öffnet den Cloud-Config-Browser (Configs hochladen, suchen und laden). **F6** öffnet den Profil-Manager (Profile erstellen/speichern/laden/löschen), **F7** den Friends-Manager
-  (Name eingeben, Enter zum Hinzufügen, `F` zum Filtern, `[remove]` zum Löschen), **F8** den separaten HUD-Editor.
-  HUD-Elemente für Watermark, FPS, Koordinaten und aktive Module werden unabhängig vom ClickGUI gerendert
-  und ihre Positionen/Sichtbarkeit/Skalierung unter `config/aerialmace-hud.json` gespeichert.
+  (Name eingeben, Enter zum Hinzufügen, `F` zum Filtern, `[remove]` zum Löschen), **F8** den HUD-Editor.
+
+### HUD (unabhängig vom ClickGUI)
+
+Die HUD-Elemente werden unabhängig vom ClickGUI gerendert und vollständig unter
+`config/aerialmace-hud.json` gespeichert:
+
+| Element | Inhalt | Settings |
+| --- | --- | --- |
+| Watermark | Client-Name | Text (umbenennbar), Scale, Farbe |
+| FPS | aktuelle FPS | Label, Scale, Farbe |
+| Coordinates | `XYZ: x / y / z` | Nachkommastellen, Label, Scale, Farbe |
+| Speed | Bewegung in `b/s` oder `km/h` | Einheit, Nachkommastellen, Label, Scale, Farbe |
+| Active Modules | nur aktivierte Module, alphabetisch | Label, Scale, Farbe |
+
+**F8** öffnet den HUD-Editor: **Ziehen** = positionieren, **V** = ein/ausblenden, **C** = Farbe,
+**+/-** = Skalierung, **L** = Label, **D** = Nachkommastellen, **K** = Einheit (Speed),
+**ENTER** = Wasser­mark-Text umbenennen, **R** = Positionen zurücksetzen, **ESC** = schließen.
+Jede Änderung wird sofort gespeichert.
+
+Platzhalter-Module (ESP, Fullbright, HUD, Speed, Step, AutoGG, NoRotate) besitzen bewusst **keine**
+Settings, solange keine echte Logik dahintersteht – ein Setting ohne Wirkung wäre ein Fake-Setting.
 
 Die GUI schreibt ausschließlich in die bestehende `config/aerialmace.json` (Modul-Sidebar
-`MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte. Änderungen werden gedrosselt
-(maximal vier Schreibvorgänge pro Sekunde) und beim Verlassen der Welt werden Friends unter
-`config/aerialmace-friends.json` gespeichert. Friends stehen zentral über `FriendManager` für
+`MaceSwitch` ↔ Combat-Logik) — es gibt keine parallelen GUI-Werte. Umgekehrt liest die GUI ihre
+Werte nach jedem Config-Laden, Profilwechsel oder übernommenen Cloud-Config wieder aus
+`ModConfig` zurück, sodass Anzeige und echte Combat-Werte nie auseinanderlaufen. Änderungen werden
+gedrosselt (maximal vier Schreibvorgänge pro Sekunde) und beim Verlassen der Welt werden Friends
+unter `config/aerialmace-friends.json` gespeichert. Friends stehen zentral über `FriendManager` für
 Combat und zukünftige Visual-Module bereit; das Combat-Modul ignoriert sie standardmäßig.
 
 ## Technik
@@ -264,9 +304,17 @@ lädt die jeweilige Cloud-Config herunter und übernimmt sie sofort. **R** aktua
 ## Releases
 
 Releases sind bewusst getrennt von den Cloud-Configs und laufen wie gewohnt über die
-[Releases-Seite](../../releases): die JAR wird mit `./gradlew build` erzeugt und manuell an den
-Release angehängt. Es gibt keine Automatik, die Releases mit Cloud-Funktionen verbindet — Cloud ist
-ausschließlich für die Client-Configs zuständig.
+[Releases-Seite](../../releases). Ein Versions-Tag löst den Release automatisch aus:
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+Der Workflow [`release.yml`](.github/workflows/release.yml) baut die Mod mit JDK 21 und hängt die
+fertige JAR (`build/libs/aerial-mace-automation-<version>.jar`) samt automatisch generierten
+Release-Notes an das GitHub-Release. Die Version selbst wird in [`gradle.properties`](gradle.properties)
+(`mod_version`) gepflegt. Eine Cloud-Anbindung ist dafür nicht nötig — Cloud ist ausschließlich für
+die Client-Configs zuständig.
 
 ## Release und Qualitätssicherung
 

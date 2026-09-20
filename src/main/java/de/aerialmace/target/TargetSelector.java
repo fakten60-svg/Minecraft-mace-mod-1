@@ -7,9 +7,7 @@ import de.aerialmace.config.ModConfig;
 import de.aerialmace.friend.FriendManager;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 
 /**
@@ -106,16 +104,4 @@ public final class TargetSelector {
 		return !ownTeam.equals(otherTeam);
 	}
 
-	/**
-	 * True when the local client is connected to an integrated or dedicated server with the
-	 * given player present. Kept as a tiny helper for diagnostics.
-	 */
-	public static boolean isPlayerTracked(MinecraftClient client, PlayerEntity player) {
-		ClientPlayNetworkHandler handler = client.getNetworkHandler();
-		if (handler == null) {
-			return false;
-		}
-		PlayerListEntry entry = handler.getPlayerListEntry(player.getUuid());
-		return entry != null;
-	}
 }

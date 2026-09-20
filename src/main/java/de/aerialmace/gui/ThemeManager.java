@@ -8,10 +8,6 @@ import de.aerialmace.module.setting.ColorSetting;
  */
 public final class ThemeManager {
 
-	public enum Theme {
-		DARK, MIDNIGHT, MONO
-	}
-
 	private static final ThemeManager INSTANCE = new ThemeManager();
 
 	/** Global access point used by the GUI and the config layer. */
@@ -72,6 +68,16 @@ public final class ThemeManager {
 	/** Derived surface color (slightly lighter than the panel) for knobs/inputs. */
 	public int surface() {
 		return lerp(panel.getColor(), 0xFF2A2A33, 0.35f);
+	}
+
+	/** Slider/range track: derived from the panel color instead of a hardcoded value. */
+	public int track() {
+		return lerp(panel.getColor(), 0xFF000000, 0.55f);
+	}
+
+	/** Semantic warning color (keybind conflict markers). */
+	public int warning() {
+		return 0xFFF87171;
 	}
 
 	/** Derived hover overlay (subtle white wash). */

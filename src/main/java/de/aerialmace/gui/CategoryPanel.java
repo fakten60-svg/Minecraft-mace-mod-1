@@ -40,6 +40,7 @@ public class CategoryPanel {
 	private int width = PANEL_WIDTH;
 	private int contentHeight;
 	private int visibleArea;
+	private int maxVisibleHeight = MAX_VISIBLE_HEIGHT;
 	private int renderOffsetY;
 	private double scrollOffset;
 	private double scrollTarget;
@@ -79,7 +80,10 @@ public class CategoryPanel {
 		panel.directComponents.add(actionComponent("Reset Keybinds", callbacks::resetKeybinds, callbacks));
 		panel.directComponents.add(actionComponent("Reset Theme", callbacks::resetTheme, callbacks));
 		panel.directComponents.add(actionComponent("Reset GUI Layout", callbacks::resetLayout, callbacks));
-		panel.directComponents.add(actionComponent("Reset Everything", callbacks::resetEverything, callbacks));
+		// Destructive action, so the label changes while the screen waits for confirmation.
+		panel.directComponents.add(SettingComponents.create(new ActionSetting("Reset Everything",
+				() -> callbacks.isConfirmingReset() ? "Reset Everything? Click again to confirm" : "Reset Everything",
+				callbacks::resetEverything), callbacks));
 		return panel;
 	}
 
@@ -115,16 +119,27 @@ public class CategoryPanel {
 		this.y = y;
 	}
 
+	/**
+	 * Height budget (in UI units) the panel body may use. Set by the screen so a panel never
+	 * grows taller than the window - otherwise its scrolled content would be unreachable at
+	 * a high GUI scale.
+	 */
+	public void setMaxVisibleHeight(int value) {
+		this.maxVisibleHeight = Math.max(80, value);
+	}
+
+	/** Keeps the panel (and with it its drag handle) inside the visible UI area. */
+	public void clampPosition(int maxX, int maxY) {
+		this.x = Math.max(0, Math.min(this.x, Math.max(0, maxX)));
+		this.y = Math.max(0, Math.min(this.y, Math.max(0, maxY)));
+	}
+
 	public int getX() {
 		return x;
 	}
 
 	public int getY() {
 		return y + renderOffsetY;
-	}
-
-	public int getWidth() {
-		return width;
 	}
 
 	private int totalHeight() {
@@ -175,7 +190,8 @@ public class CategoryPanel {
 
 		// Layout pass: components get their absolute positions (including scroll).
 		contentHeight = totalHeight();
-		visibleArea = Math.min(contentHeight, MAX_VISIBLE_HEIGHT);
+		int bodyBudget = Math.min(MAX_VISIBLE_HEIGHT, maxVisibleHeight - y - HEADER_HEIGHT);
+		visibleArea = Math.min(contentHeight, Math.max(80, bodyBudget));
 		double maxScroll = Math.max(0, contentHeight - visibleArea);
 		scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
 
@@ -281,6 +297,21 @@ public class CategoryPanel {
 
 	public void scroll(double amount) {
 		scrollTarget -= amount * 22.0;
+	}
+
+	/** True while any component of this panel is capturing a keybind. */
+	public boolean isRecording() {
+		for (ModuleComponent module : modules) {
+			if (module.isRecording()) {
+				return true;
+			}
+		}
+		for (SettingComponent component : directComponents) {
+			if (component.isRecording()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Forwards keys to components (keybind recording). */

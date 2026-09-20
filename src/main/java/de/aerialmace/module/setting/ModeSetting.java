@@ -8,6 +8,8 @@ import com.google.gson.JsonPrimitive;
 
 /**
  * Mode setting (dropdown in the GUI).
+ *
+ * <p>The writer is only called on real changes (construction has no side effect).
  */
 public class ModeSetting extends Setting {
 
@@ -22,7 +24,6 @@ public class ModeSetting extends Setting {
 		this.defaultValue = defaultValue;
 		this.writer = writer;
 		this.value = options.contains(defaultValue) ? defaultValue : options.get(0);
-		writer.accept(value);
 	}
 
 	public List<String> getOptions() {

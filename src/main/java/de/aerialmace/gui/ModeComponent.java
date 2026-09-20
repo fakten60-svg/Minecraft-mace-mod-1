@@ -74,29 +74,46 @@ public class ModeComponent extends SettingComponent {
 			return false;
 		}
 
-		if (open && mouseY > y + ROW_HEIGHT) {
-			int index = (int) ((mouseY - (y + ROW_HEIGHT)) / ROW_HEIGHT);
-			List<String> options = mode.getOptions();
-			if (index >= 0 && index < options.size()) {
-				mode.setValue(options.get(index));
-				callback.markDirty();
+		// Only clicks inside this row's own dropdown may pick an option; a click anywhere
+		// else just closes it, so neighbouring rows never change value by accident.
+		if (open) {
+			int listY = y + ROW_HEIGHT;
+			int listBottom = listY + mode.getOptions().size() * ROW_HEIGHT;
+			boolean insideDropdown = mouseX >= x && mouseX <= x + width && mouseY >= listY && mouseY < listBottom;
+			boolean insideRow = isHovered(mouseX, mouseY, ROW_HEIGHT);
+			if (insideDropdown) {
+				int index = (int) ((mouseY - listY) / ROW_HEIGHT);
+				List<String> options = mode.getOptions();
+				if (index >= 0 && index < options.size()) {
+					mode.setValue(options.get(index));
+					callback.markDirty();
+				}
+				close();
+				callback.playClick();
+				return true;
 			}
-			open = false;
-			callback.playClick();
-			return true;
+			if (!insideRow) {
+				close();
+				return true; // consume the click that dismissed the dropdown
+			}
 		}
 
 		if (isHovered(mouseX, mouseY, ROW_HEIGHT)) {
-			open = !open;
 			if (open) {
-				openAnim.open();
+				close();
 			} else {
-				openAnim.close();
+				open = true;
+				openAnim.open();
 			}
 			callback.playClick();
 			return true;
 		}
 		return false;
+	}
+
+	private void close() {
+		open = false;
+		openAnim.close();
 	}
 
 	@Override

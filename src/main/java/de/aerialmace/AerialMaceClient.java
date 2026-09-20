@@ -24,6 +24,7 @@ import de.aerialmace.module.modules.StepModule;
 import de.aerialmace.sequence.SequenceStateMachine;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 
@@ -75,6 +76,14 @@ public class AerialMaceClient implements ClientModInitializer {
 			stateMachine.reset();
 			FriendManager.save();
 			HudManager.save();
+			ConfigManager.saveNow();
+			ModConfig.flushPending();
+		});
+		// Final write when the game shuts down so nothing pending is lost.
+		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+			ConfigManager.saveNow();
+			FriendManager.save();
+			HudManager.save();
 		});
 
 		LOGGER.info("Aerial Mace Automation initialized (enabled: {})", config.enabled);
@@ -87,16 +96,13 @@ public class AerialMaceClient implements ClientModInitializer {
 		}
 		CloudConfigs.poll(config);
 		ModConfig.flushPending();
+		ConfigManager.flushPending();
 		stateMachine.tick(client);
 	}
 
 	/** Shared handle for screens that need the live combat config (cloud config sharing). */
 	public static ModConfig getConfig() {
 		return activeConfig;
-	}
-
-	public static void saveClientData() {
-		FriendManager.save();
 	}
 
 }

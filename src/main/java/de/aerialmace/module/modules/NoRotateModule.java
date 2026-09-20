@@ -2,20 +2,19 @@ package de.aerialmace.module.modules;
 
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleCategory;
-import de.aerialmace.module.setting.BooleanSetting;
 
 /**
- * Simple test module for the Misc category (no real gameplay logic yet).
+ * Misc placeholder. Deliberately without settings until a real rotation implementation
+ * exists - a toggle that changes nothing would be a fake setting.
  */
 public class NoRotateModule extends Module {
 
 	public NoRotateModule() {
-		super("NoRotate", "Testmodul: ignoriert Server-Rotationen (Platzhalter).", ModuleCategory.MISC);
+		super("NoRotate", "Platzhalter: ignoriert Server-Rotationen (noch keine Gameplay-Logik).", ModuleCategory.MISC);
 	}
 
 	@Override
 	protected void registerSettings() {
-		addSetting(new BooleanSetting("Pitch", true, value -> {
-		}));
+		// No settings on purpose - see the class comment.
 	}
 }

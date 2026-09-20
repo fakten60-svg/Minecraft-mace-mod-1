@@ -2,20 +2,19 @@ package de.aerialmace.module.modules;
 
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleCategory;
-import de.aerialmace.module.setting.BooleanSetting;
 
 /**
- * Simple test module for the Misc category (no real gameplay logic yet).
+ * Misc placeholder. Deliberately without settings until a real chat implementation exists -
+ * a toggle that changes nothing would be a fake setting.
  */
 public class AutoGGModule extends Module {
 
 	public AutoGGModule() {
-		super("AutoGG", "Testmodul: schreibt gg nach Spielen (Platzhalter).", ModuleCategory.MISC);
+		super("AutoGG", "Platzhalter: schreibt gg nach Spielen (noch keine Gameplay-Logik).", ModuleCategory.MISC);
 	}
 
 	@Override
 	protected void registerSettings() {
-		addSetting(new BooleanSetting("Delay", true, value -> {
-		}));
+		// No settings on purpose - see the class comment.
 	}
 }

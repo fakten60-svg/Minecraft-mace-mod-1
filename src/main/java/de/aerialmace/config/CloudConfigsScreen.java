@@ -26,14 +26,16 @@ public final class CloudConfigsScreen extends Screen {
     /** Editable text fields, cycled with TAB. */
     private enum Field {
         SHARE_URL, SHARE_KEY, AUTHOR, UPLOAD_NAME
-    }	private final ModConfig config;
-	private Field field = Field.UPLOAD_NAME;
-	private int refreshCooldown;
-	private long selectedId = -1L;
-	private String urlBuffer;
-	private String keyBuffer;
-	private String authorBuffer;
-	private String uploadName = "my-config";
+    }
+
+    private final ModConfig config;
+    private Field field = Field.UPLOAD_NAME;
+    private int refreshCooldown;
+    private long selectedId = -1L;
+    private String urlBuffer;
+    private String keyBuffer;
+    private String authorBuffer;
+    private String uploadName = "my-config";
 
 
     public CloudConfigsScreen(ModConfig config) {
@@ -149,8 +151,8 @@ public final class CloudConfigsScreen extends Screen {
             saveFields();
             CloudConfigs.upload(config, uploadName);
             return true;
-        }		if (key == GLFW.GLFW_KEY_R && refreshCooldown <= 0) {
-
+        }
+        if (key == GLFW.GLFW_KEY_R && refreshCooldown <= 0) {
             refreshCooldown = 20;
             CloudConfigs.refresh(config);
             return true;

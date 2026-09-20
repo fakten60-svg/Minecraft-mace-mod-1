@@ -161,6 +161,8 @@ public final class CloudConfigs {
         local.copyFrom(remote);
         local.normalize();
         ModConfig.requestSave(local);
+        // The ClickGUI mirrors the combat values, so it has to follow the applied config.
+        ConfigManager.refreshModuleValues();
         return true;
     }
 

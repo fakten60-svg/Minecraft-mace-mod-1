@@ -19,7 +19,11 @@ import net.minecraft.screen.slot.SlotActionType;
  */
 public final class InventoryUtils {
 
-	/** Index of the chestplate slot inside {@link PlayerScreenHandler}. */
+	/**
+	 * Slot ids inside {@link PlayerScreenHandler}, verified against the 1.21.11 layout:
+	 * 0 = crafting result, 1-4 = crafting input, 5-8 = armor (head, chest, legs, feet),
+	 * 9-35 = main inventory, 36-44 = hotbar, 45 = offhand.
+	 */
 	private static final int CHEST_SLOT_ID = 6;
 	/** First hotbar slot index inside {@link PlayerScreenHandler} (hotbar = 36..44). */
 	private static final int HOTBAR_OFFSET = 36;
@@ -65,7 +69,6 @@ public final class InventoryUtils {
 		PlayerScreenHandler handler = player.playerScreenHandler;
 		int syncId = handler.syncId;
 		int handSlot = HOTBAR_OFFSET + player.getInventory().getSelectedSlot();
-		boolean chestOccupied = !handler.slots.get(CHEST_SLOT_ID).getStack().isEmpty();
 
 		// 1. Pick the held chestplate up onto the cursor.
 		interactionManager.clickSlot(syncId, handSlot, 0, SlotActionType.PICKUP, player);
@@ -80,7 +83,8 @@ public final class InventoryUtils {
 	}
 
 	/**
-	 * Scans the hotbar for a mace.
+	 * Scans the hotbar for a mace. Only the nine hotbar slots are searched (the sequence
+	 * switches the selected slot, which is what the player would do by hand).
 	 *
 	 * @return the hotbar slot (0-8) holding a mace, or {@code -1} if none exists.
 	 */

@@ -113,7 +113,7 @@ public class ModuleComponent {
 				chipColor, false);
 		if (ModuleManager.hasKeybindConflict(module)) {
 			context.drawText(textRenderer, "!", x + width - stateWidth - 15,
-					y + (HEADER_HEIGHT - 8) / 2, 0xFFFF5555, false);
+					y + (HEADER_HEIGHT - 8) / 2, theme.warning(), false);
 		}
 
 		// Settings area (clipped while animating).
@@ -203,6 +203,16 @@ public class ModuleComponent {
 	public boolean isDragging() {
 		for (SettingComponent component : settingComponents) {
 			if (component.isDragging()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** True while one of this module's settings (usually the keybind) captures keys. */
+	public boolean isRecording() {
+		for (SettingComponent component : settingComponents) {
+			if (component.isRecording()) {
 				return true;
 			}
 		}

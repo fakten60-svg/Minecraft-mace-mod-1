@@ -29,8 +29,12 @@ public final class ModConfig {
 	// Feature toggles
 	// ------------------------------------------------------------------
 
-	/** Master switch; also toggleable in game with the configured key binding. */
-	public boolean enabled = true;
+	/**
+	 * Master switch (mirrored into the MaceSwitch module's enabled state). A fresh install
+	 * starts DISABLED: an automation module must never be armed without the user switching
+	 * it on in the ClickGUI or with its keybind. An existing config file keeps its value.
+	 */
+	public boolean enabled = false;
 
 	/** When true the sequence only starts while the local player is sneaking. */
 	public boolean requireSneaking = false;

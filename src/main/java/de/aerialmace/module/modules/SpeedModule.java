@@ -2,20 +2,19 @@ package de.aerialmace.module.modules;
 
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleCategory;
-import de.aerialmace.module.setting.SliderSetting;
 
 /**
- * Simple test module for the Movement category (no real gameplay logic yet).
+ * Movement placeholder. Deliberately without settings until a real movement implementation
+ * exists - a slider that changes nothing would be a fake setting.
  */
 public class SpeedModule extends Module {
 
 	public SpeedModule() {
-		super("Speed", "Testmodul: Bewegungsgeschwindigkeit (Platzhalter).", ModuleCategory.MOVEMENT);
+		super("Speed", "Platzhalter: Bewegungsgeschwindigkeit (noch keine Gameplay-Logik).", ModuleCategory.MOVEMENT);
 	}
 
 	@Override
 	protected void registerSettings() {
-		addSetting(new SliderSetting("Speed", "x", 1.0, 3.0, 1.5, 0.1, (value, unused) -> {
-		}));
+		// No settings on purpose - see the class comment.
 	}
 }

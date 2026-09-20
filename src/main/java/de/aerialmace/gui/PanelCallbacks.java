@@ -20,4 +20,7 @@ public interface PanelCallbacks extends GuiCallback {
 
 	/** Restores all client-owned state to defaults. */
 	void resetEverything();
+
+	/** True while the screen waits for the "Reset Everything" confirmation click. */
+	boolean isConfirmingReset();
 }

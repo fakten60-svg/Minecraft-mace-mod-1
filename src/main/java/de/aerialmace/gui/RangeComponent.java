@@ -20,6 +20,10 @@ public class RangeComponent extends SettingComponent {
 	private final RangeSetting range;
 	private boolean draggingMin;
 	private boolean draggingMax;
+	/** Both handles sat on the same value when the drag started (e.g. the 0–0 default). */
+	private boolean coincident;
+	/** Value both handles shared at the drag start - used to detect the pull direction. */
+	private double dragAnchor;
 
 	public RangeComponent(RangeSetting range, GuiCallback callback) {
 		super(range, callback);
@@ -47,7 +51,7 @@ public class RangeComponent extends SettingComponent {
 		int maxPos = Math.round(barW * fractionOf(range.getMaxValue()));
 
 		// Track
-		context.fill(barX, barY, barX + barW, barY + 3, 0xFF0B0B0E);
+		context.fill(barX, barY, barX + barW, barY + 3, theme.track());
 		// Selected range between the two handles
 		context.fill(barX + minPos, barY, barX + maxPos, barY + 3, theme.accent().getColor());
 		// Two handles
@@ -87,15 +91,22 @@ public class RangeComponent extends SettingComponent {
 
 		double distMin = Math.abs(mouseX - (barX + minPos));
 		double distMax = Math.abs(mouseX - (barX + maxPos));
-		// When both handles overlap (the valid 0–0 default for optional delays),
-		// choose the side of the shared handle so the user can grow the range in either direction.
-		boolean chooseMin = distMin < distMax || (distMin == distMax && mouseX < barX + minPos);
-		if (chooseMin) {
-			draggingMin = true;
-			range.setMinValue(valueFromMouse(mouseX));
+		// When both handles overlap (the valid 0–0 default for optional delays) the range must
+		// be pullable apart in either direction, so the drag direction decides below instead.
+		coincident = Math.abs(range.getMaxValue() - range.getMinValue()) <= 0.0001;
+		dragAnchor = range.getMinValue();
+		if (coincident) {
+			draggingMin = distMin < distMax || (distMin == distMax && mouseX < barX + minPos);
+			draggingMax = !draggingMin;
 		} else {
-			draggingMax = true;
-			range.setMaxValue(valueFromMouse(mouseX));
+			boolean chooseMin = distMin < distMax || (distMin == distMax && mouseX < barX + minPos);
+			if (chooseMin) {
+				draggingMin = true;
+				range.setMinValue(valueFromMouse(mouseX));
+			} else {
+				draggingMax = true;
+				range.setMaxValue(valueFromMouse(mouseX));
+			}
 		}
 		callback.playClick();
 		return true;
@@ -106,16 +117,35 @@ public class RangeComponent extends SettingComponent {
 		if (draggingMin || draggingMax) {
 			draggingMin = false;
 			draggingMax = false;
+			coincident = false;
 			callback.markDirty();
 		}
 	}
 
 	@Override
 	public void mouseDragged(Click click, double deltaX, double deltaY) {
+		if (!draggingMin && !draggingMax) {
+			return;
+		}
+		double value = valueFromMouse(click.x());
+		if (coincident) {
+			// First real movement decides the side: left of the shared handle grows the minimum,
+			// right of it grows the maximum. Nothing moves until the direction is clear.
+			if (value < dragAnchor) {
+				draggingMin = true;
+				draggingMax = false;
+			} else if (value > dragAnchor) {
+				draggingMin = false;
+				draggingMax = true;
+			} else {
+				return;
+			}
+			coincident = false;
+		}
 		if (draggingMin) {
-			range.setMinValue(valueFromMouse(click.x()));
-		} else if (draggingMax) {
-			range.setMaxValue(valueFromMouse(click.x()));
+			range.setMinValue(value);
+		} else {
+			range.setMaxValue(value);
 		}
 	}
 

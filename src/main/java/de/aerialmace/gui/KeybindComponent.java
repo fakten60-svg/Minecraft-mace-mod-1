@@ -7,8 +7,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.MinecraftClient;
 
 /**
- * Keybind setting row. Click starts the recording mode ("Press a key..."); the next key
- * is stored, ESC or clicking NONE clears the bind back to NONE.
+ * Keybind setting row. Left click starts the recording mode ("Press a key...") and the next
+ * key is stored. ESC aborts the recording without changing the bind; right-clicking the row
+ * clears the bind back to NONE. While recording, a non-primary mouse button (middle, 4, 5)
+ * can be assigned as well. All keys are stored as raw GLFW codes, which is exactly what
+ * {@link de.aerialmace.input.KeybindManager} polls.
  */
 public class KeybindComponent extends SettingComponent {
 
@@ -47,14 +50,35 @@ public class KeybindComponent extends SettingComponent {
 
 	@Override
 	public boolean mouseClicked(Click click, double mouseX, double mouseY) {
-		if (click.button() == 0 && isHovered(mouseX, mouseY, getHeight())) {
+		boolean hovered = isHovered(mouseX, mouseY, getHeight());
+		// While "Press a key..." is active, a non-primary mouse button is a bind, not a GUI
+		// click. The primary button keeps starting/stopping the recording so the row stays
+		// usable as a normal GUI element.
+		if (recording && hovered && click.button() > 1) {
+			keybind.setKey(KeybindSetting.MOUSE_FLAG | click.button());
+			recording = false;
+			callback.markDirty();
+			callback.playClick();
+			return true;
+		}
+		if (!hovered) {
+			if (recording) {
+				recording = false;
+			}
+			return false;
+		}
+		if (click.button() == 0) {
 			recording = true;
 			callback.playClick();
 			return true;
 		}
-		// Clicking anywhere else stops recording without changing the bind.
-		if (recording) {
+		if (click.button() == 1) {
+			// Right-click clears the bind back to NONE.
 			recording = false;
+			keybind.setKey(KeybindSetting.NONE);
+			callback.markDirty();
+			callback.playClick();
+			return true;
 		}
 		return false;
 	}
@@ -64,11 +88,11 @@ public class KeybindComponent extends SettingComponent {
 		if (!recording) {
 			return false;
 		}
-		if (keyCode == 256) { // ESC clears back to NONE
-			keybind.setKey(KeybindSetting.NONE);
-		} else {
-			keybind.setKey(keyCode);
+		if (keyCode == 256) { // ESC aborts the capture and keeps the previous bind
+			recording = false;
+			return true;
 		}
+		keybind.setKey(keyCode);
 		recording = false;
 		callback.markDirty();
 		callback.playClick();
@@ -78,6 +102,12 @@ public class KeybindComponent extends SettingComponent {
 	/** Ends recording without changing the bind (click landed elsewhere). */
 	public void cancelRecording() {
 		recording = false;
+	}
+
+	/** True while waiting for the next key ("Press a key..."). */
+	@Override
+	public boolean isRecording() {
+		return recording;
 	}
 
 	@Override

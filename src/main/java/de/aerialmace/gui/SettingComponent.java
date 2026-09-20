@@ -59,6 +59,14 @@ public abstract class SettingComponent {
 		return false;
 	}
 
+	/**
+	 * True while this component captures keyboard input (keybind recording). The screen
+	 * checks this so typed characters never leak into the module search or module logic.
+	 */
+	public boolean isRecording() {
+		return false;
+	}
+
 	protected boolean isHovered(double mouseX, double mouseY, int height) {
 		return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
 	}

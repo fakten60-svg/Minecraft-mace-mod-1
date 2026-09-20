@@ -2,20 +2,21 @@ package de.aerialmace.module.modules;
 
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleCategory;
-import de.aerialmace.module.setting.BooleanSetting;
 
 /**
- * Simple test module for the Visuals category (no real gameplay logic yet).
+ * Visuals placeholder. The real HUD elements (watermark, FPS, coordinates, speed, active
+ * modules) live in {@link de.aerialmace.hud.HudManager} and are configured in the HUD editor
+ * (F8). This module intentionally has no settings: a toggle here would be a second source of
+ * truth for the same visibility flags.
  */
 public class HUDModule extends Module {
 
 	public HUDModule() {
-		super("HUD", "Testmodul: HUD-Overlay (Platzhalter).", ModuleCategory.VISUALS);
+		super("HUD", "Platzhalter: HUD-Elemente werden im HUD-Editor (F8) verwaltet.", ModuleCategory.VISUALS);
 	}
 
 	@Override
 	protected void registerSettings() {
-		addSetting(new BooleanSetting("Watermark", true, value -> {
-		}));
+		// No settings on purpose - see the class comment.
 	}
 }

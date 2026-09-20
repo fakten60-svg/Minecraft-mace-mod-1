@@ -31,11 +31,17 @@ import org.lwjgl.glfw.GLFW;
  */
 public class ClickGuiScreen extends Screen implements PanelCallbacks {
 
+	/** How long the "Reset Everything" confirmation stays armed. */
+	private static final long CONFIRM_WINDOW_MS = 5_000L;
+
 	private final List<CategoryPanel> panels = new ArrayList<>();
 	private final Animation openAnimation = new Animation(1.0f);
+	/** Columns of the default layout for the current GUI scale. */
+	private int gridColumns = 4;
 	private long lastFrameNanos = System.nanoTime();
 	private boolean needsSave;
 	private String search = "";
+	private long confirmResetUntilMs;
 
 	public ClickGuiScreen() {
 		super(Text.literal("AerialMace ClickGUI"));
@@ -51,16 +57,25 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		}
 		panels.add(CategoryPanel.clientSettingsPanel(this));
 
-		// Default layout: a clean four-column grid; saved positions win when present.
+		// Default layout: a grid that always fits the current GUI scale (a fixed four-column
+		// grid would push panels off-screen for scale > 1). Saved positions win when present,
+		// but every panel is clamped into the reachable area so it can never end up
+		// off-screen and undraggable.
+		float scale = uiScale();
+		int uiWidth = Math.round(width / scale);
+		int uiHeight = Math.round(height / scale);
+		gridColumns = Math.max(1, Math.min(panels.size(), (uiWidth - 20) / 176));
 		for (int index = 0; index < panels.size(); index++) {
 			CategoryPanel panel = panels.get(index);
+			panel.setMaxVisibleHeight(uiHeight - 8);
 			if (panel.hasSavedPosition()) {
 				panel.applySavedPosition();
 			} else {
-				int column = index % 4;
-				int row = index / 4;
+				int column = index % gridColumns;
+				int row = index / gridColumns;
 				panel.setPosition(20 + column * 176, 34 + row * 292);
 			}
+			panel.clampPosition(uiWidth - 60, uiHeight - 30);
 		}
 
 		openAnimation.open();
@@ -77,15 +92,8 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		openAnimation.update(deltaSeconds);
 		float eased = openAnimation.eased();
 
-		// Compact global module search. Typing filters every category panel.
 		var clientSettings = de.aerialmace.module.modules.ClientSettingsModule.get();
 		boolean showSearch = clientSettings == null || clientSettings.getState().showSearch;
-		if (showSearch) {
-			context.fill(12, 8, 220, 24, ThemeManager.get().surface());
-			context.drawText(MinecraftClient.getInstance().textRenderer,
-					search.isEmpty() ? "Search modules..." : search, 18, 13,
-					search.isEmpty() ? ThemeManager.get().secondaryText().getColor() : ThemeManager.get().text().getColor(), false);
-		}
 		for (CategoryPanel panel : panels) panel.setFilter(search);
 
 		// Dark translucent background overlay.
@@ -94,17 +102,29 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 			context.fill(0, 0, width, height, ThemeManager.withAlpha(0x000000, overlayAlpha));
 		}
 
-		// GUI scale (client setting): scale the panel layer around the screen center.
+		// GUI scale (client setting): anchored at the top-left corner. Centering the scaled
+		// layer would push panels off-screen for scale > 1 and make them unreachable.
 		float scale = uiScale();
-		double offX = (width - width * scale) / 2.0;
-		double offY = (height - height * scale) / 2.0;
+		// The window can be resized while the GUI is open, so the height budget is refreshed
+		// every frame (it decides how much of a panel is shown before it scrolls).
+		int uiHeightBudget = Math.round(height / scale) - 8;
+		for (CategoryPanel panel : panels) {
+			panel.setMaxVisibleHeight(uiHeightBudget);
+		}
 		var matrices = context.getMatrices();
 		matrices.pushMatrix();
 		matrices.scale(scale, scale);
-		matrices.translate((float) (offX / scale), (float) (offY / scale));
 
-		double uiMouseX = (mouseX - offX) / scale;
-		double uiMouseY = (mouseY - offY) / scale;
+		double uiMouseX = mouseX / scale;
+		double uiMouseY = mouseY / scale;
+
+		// Search bar lives inside the scaled layer so it follows the GUI scale too.
+		if (showSearch) {
+			context.fill(12, 8, 220, 24, ThemeManager.get().surface());
+			context.drawText(MinecraftClient.getInstance().textRenderer,
+					search.isEmpty() ? "Search modules..." : search, 18, 13,
+					search.isEmpty() ? ThemeManager.get().secondaryText().getColor() : ThemeManager.get().text().getColor(), false);
+		}
 
 		for (CategoryPanel panel : panels) {
 			panel.update(deltaSeconds);
@@ -118,12 +138,10 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		}
 	}
 
-	/** Converts screen coords into scaled UI coords. */
+	/** Converts screen coords into scaled UI coords (top-left anchored). */
 	private double[] toUi(double screenX, double screenY) {
 		float scale = uiScale();
-		double offX = (width - width * scale) / 2.0;
-		double offY = (height - height * scale) / 2.0;
-		return new double[] { (screenX - offX) / scale, (screenY - offY) / scale };
+		return new double[] { screenX / scale, screenY / scale };
 	}
 
 	private float uiScale() {
@@ -142,12 +160,26 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 			panel.stopRecordingIfOutside(mouseX, mouseY);
 		}
 
-		for (CategoryPanel panel : panels) {
+		// Topmost panel first, and the panel that handles the click is raised. Without this a
+		// panel's expanded settings could be drawn behind a later panel while still receiving
+		// clicks (invisible but interactive).
+		for (int index = panels.size() - 1; index >= 0; index--) {
+			CategoryPanel panel = panels.get(index);
 			if (panel.mouseClicked(click, mouseX, mouseY)) {
+				bringToFront(panel);
 				return true;
 			}
 		}
 		return super.mouseClicked(click, doubled);
+	}
+
+	/** Moves a panel to the front of both the draw and the input order. */
+	private void bringToFront(CategoryPanel panel) {
+		if (panels.isEmpty() || panels.get(panels.size() - 1) == panel) {
+			return;
+		}
+		panels.remove(panel);
+		panels.add(panel);
 	}
 
 	@Override
@@ -155,14 +187,24 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		for (CategoryPanel panel : panels) {
 			panel.mouseReleased(click);
 		}
+		// A drag must not be able to park a panel outside the visible area.
+		float scale = uiScale();
+		int maxX = Math.round(width / scale) - 60;
+		int maxY = Math.round(height / scale) - 30;
+		for (CategoryPanel panel : panels) {
+			panel.clampPosition(maxX, maxY);
+		}
 		return super.mouseReleased(click);
 	}
 
 	@Override
 	public boolean mouseDragged(Click click, double deltaX, double deltaY) {
 		double[] ui = toUi(click.x(), click.y());
-		for (CategoryPanel panel : panels) {
-			if (panel.mouseDragged(click, ui[0], ui[1], deltaX, deltaY)) {
+		// Sliders/ranges/pickers read click.x()/click.y(), so they must receive UI-space
+		// coordinates as well - otherwise a GUI scale other than 1 would write wrong values.
+		Click uiClick = new Click(ui[0], ui[1], click.buttonInfo());
+		for (int index = panels.size() - 1; index >= 0; index--) {
+			if (panels.get(index).mouseDragged(uiClick, ui[0], ui[1], deltaX, deltaY)) {
 				return true;
 			}
 		}
@@ -172,7 +214,8 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
 		double[] ui = toUi(mouseX, mouseY);
-		for (CategoryPanel panel : panels) {
+		for (int index = panels.size() - 1; index >= 0; index--) {
+			CategoryPanel panel = panels.get(index);
 			if (panel.isMouseOverPanel(ui[0], ui[1])) {
 				panel.scroll(vertical);
 				return true;
@@ -185,16 +228,17 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	public boolean keyPressed(KeyInput input) {
 		int keyCode = input.getKeycode();
 
-		if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) {
-			search = search.substring(0, search.length() - 1);
-			return true;
-		}
-
-		// Keybind recording first.
+		// Keybind recording owns the keyboard first: while "Press a key..." is active no
+		// other handler (search, module toggles) may react to the same press.
 		for (CategoryPanel panel : panels) {
 			if (panel.keyPressed(keyCode)) {
 				return true;
 			}
+		}
+
+		if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) {
+			search = search.substring(0, search.length() - 1);
+			return true;
 		}
 
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
@@ -228,8 +272,21 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 		super.removed();
 	}
 
+	/** True while any panel captures a keybind, so typed text must not reach the search. */
+	private boolean isRecording() {
+		for (CategoryPanel panel : panels) {
+			if (panel.isRecording()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public boolean charTyped(CharInput input) {
+		if (isRecording()) {
+			return true;
+		}
 		if (input.isValidChar()) {
 			char chr = (char) input.codepoint();
 			if (Character.isLetterOrDigit(chr) || chr == '_' || chr == ' ') {
@@ -289,13 +346,19 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 
 	@Override
 	public void resetKeybinds() {
-		// GUI keybind -> RIGHT_SHIFT, all module keybinds -> NONE.
+		// Reset the real settings, not just the cached state: the GUI Keybind setting falls
+		// back to RIGHT_SHIFT and every module keybind back to NONE.
+		for (var module : ModuleManager.getModules()) {
+			for (Setting setting : module.getSettings()) {
+				if (setting instanceof KeybindSetting) {
+					setting.reset();
+				}
+			}
+			module.getKeybind().reset();
+		}
 		var clientSettings = de.aerialmace.module.modules.ClientSettingsModule.get();
 		if (clientSettings != null) {
-			clientSettings.getState().guiKey = 344;
-		}
-		for (var module : ModuleManager.getModules()) {
-			module.getKeybind().reset();
+			clientSettings.getState().guiKey = de.aerialmace.module.modules.ClientSettingsModule.DEFAULT_GUI_KEY;
 		}
 	}
 
@@ -315,22 +378,48 @@ public class ClickGuiScreen extends Screen implements PanelCallbacks {
 	@Override
 	public void resetLayout() {
 		for (int index = 0; index < panels.size(); index++) {
-			int column = index % 4;
-			int row = index / 4;
+			int column = index % gridColumns;
+			int row = index / gridColumns;
 			panels.get(index).setPosition(20 + column * 176, 34 + row * 292);
 		}
+		// "Reset GUI Layout" covers the HUD positions as well.
+		de.aerialmace.hud.HudManager.resetLayout();
 		markDirty();
 	}
 
+	/**
+	 * Destructive reset. The first click only arms the action (the button label switches to a
+	 * confirmation prompt); the second click within {@link #CONFIRM_WINDOW_MS} performs it.
+	 * The friend list is user data and is deliberately left untouched.
+	 */
 	@Override
 	public void resetEverything() {
+		long now = System.currentTimeMillis();
+		if (now > confirmResetUntilMs) {
+			confirmResetUntilMs = now + CONFIRM_WINDOW_MS;
+			playClick();
+			markDirty();
+			return;
+		}
+		confirmResetUntilMs = 0L;
 		resetModuleSettings();
 		resetKeybinds();
 		resetTheme();
 		resetLayout();
-		de.aerialmace.friend.FriendManager.clear();
-		de.aerialmace.friend.FriendManager.save();
+		de.aerialmace.hud.HudManager.resetAll();
 		markDirty();
+	}
+
+	@Override
+	public boolean isConfirmingReset() {
+		if (confirmResetUntilMs == 0L) {
+			return false;
+		}
+		if (System.currentTimeMillis() > confirmResetUntilMs) {
+			confirmResetUntilMs = 0L;
+			return false;
+		}
+		return true;
 	}
 
 	/** Default accent tint per category. */

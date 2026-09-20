@@ -20,6 +20,8 @@ public class ColorPickerComponent extends SettingComponent {
 	private boolean open;
 	private boolean draggingSV;
 	private boolean draggingHue;
+	/** Last color the picker knew about; detects changes made outside the picker. */
+	private int lastColor;
 	private float hue = 0.55f;
 	private float saturation = 0.7f;
 	private float value = 0.95f;
@@ -33,6 +35,7 @@ public class ColorPickerComponent extends SettingComponent {
 
 	private void initFromSetting() {
 		int argb = color.getColor();
+		this.lastColor = argb;
 		float r = ((argb >> 16) & 0xFF) / 255f;
 		float g = ((argb >> 8) & 0xFF) / 255f;
 		float b = (argb & 0xFF) / 255f;
@@ -63,6 +66,12 @@ public class ColorPickerComponent extends SettingComponent {
 	@Override
 	public void update(float deltaSeconds) {
 		openAnim.update(deltaSeconds);
+		// Re-derive the HSV state when the color changed outside this picker (theme preset,
+		// "Reset Theme", config load, cloud config), so the next drag continues from the
+		// color that is actually displayed instead of jumping back to a stale one.
+		if (!draggingSV && !draggingHue && color.getColor() != lastColor) {
+			initFromSetting();
+		}
 	}
 
 	@Override
@@ -86,17 +95,17 @@ public class ColorPickerComponent extends SettingComponent {
 			if (pickerH > 4) {
 				int areaX = x + PADDING;
 				int areaW = width - PADDING * 2;
-				int squareSize = pickerH - 12;
+				// Never negative while the panel unfolds, otherwise the gradients would be
+				// drawn with inverted corners for a frame.
+				int squareSize = Math.max(4, pickerH - 12);
 
 				// SV square: white->color horizontal, transparent->black vertical overlay
 				int pure = GuiRenderUtil.hsvToRgb(hue, 1, 1) | 0xFF000000;
 				GuiRenderUtil.horizontalGradient(context, areaX, pickerY, areaW, squareSize,
 						0xFFFFFFFF, pure);
-				for (int i = 0; i < squareSize; i++) {
-					float t = i / (float) squareSize;
-					context.fill(areaX, pickerY + i, areaX + areaW, pickerY + i + 1,
-							ThemeManager.withAlpha(0x000000, (int) (t * 255)));
-				}
+				// Single native gradient instead of one fill per row (cheaper per frame).
+				context.fillGradient(areaX, pickerY, areaX + areaW, pickerY + squareSize,
+						0x00000000, 0xFF000000);
 
 				// Hue strip below
 				GuiRenderUtil.hueStrip(context, areaX, pickerY + squareSize + 4, areaW, 6);
@@ -188,6 +197,7 @@ public class ColorPickerComponent extends SettingComponent {
 		int rgb = GuiRenderUtil.hsvToRgb(hue, saturation, value);
 		// Keep the color's original alpha (theme colors use partial transparency).
 		color.setColor((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, color.getAlpha());
+		lastColor = color.getColor();
 	}
 
 	@Override

@@ -2,20 +2,19 @@ package de.aerialmace.module.modules;
 
 import de.aerialmace.module.Module;
 import de.aerialmace.module.ModuleCategory;
-import de.aerialmace.module.setting.SliderSetting;
 
 /**
- * Simple test module for the Visuals category (no real gameplay logic yet).
+ * Visuals placeholder. Deliberately without settings until a real brightness implementation
+ * exists - a slider that changes nothing would be a fake setting.
  */
 public class FullbrightModule extends Module {
 
 	public FullbrightModule() {
-		super("Fullbright", "Testmodul: maximale Helligkeit (Platzhalter).", ModuleCategory.VISUALS);
+		super("Fullbright", "Platzhalter: maximale Helligkeit (noch keine Gameplay-Logik).", ModuleCategory.VISUALS);
 	}
 
 	@Override
 	protected void registerSettings() {
-		addSetting(new SliderSetting("Brightness", "%", 100, 1500, 1500, 10, (value, unused) -> {
-		}));
+		// No settings on purpose - see the class comment.
 	}
 }

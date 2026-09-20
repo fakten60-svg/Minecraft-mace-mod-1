@@ -33,14 +33,27 @@ public final class KeybindManager {
 
 	/** Called once per client tick. */
 	public static void tick(MinecraftClient client, int guiKeyCode) {
-		// The ClickGuiScreen handles all keys itself while open (including recording).
-		if (client.currentScreen instanceof ClickGuiScreen || client.player == null) {
+		// The ClickGuiScreen handles all keys itself while open (including recording). The
+		// physical key states are still tracked: the GUI key closes the screen, and without
+		// this the still-held key would immediately be seen as a fresh edge and reopen it.
+		if (client.currentScreen instanceof ClickGuiScreen) {
+			remember(client, guiKeyCode);
+			for (Module module : ModuleManager.getModules()) {
+				remember(client, module.getKeybind().getKey());
+			}
+			return;
+		}
+		if (client.player == null) {
 			PREVIOUS_STATES.clear();
 			return;
 		}
-		// Don't trigger anything while a vanilla screen (chat, inventory...) is open.
+		// Don't trigger anything while a vanilla screen (chat, inventory...) is open, but keep
+		// the states in sync so no press is replayed once it closes.
 		if (client.currentScreen != null) {
-			PREVIOUS_STATES.clear();
+			remember(client, guiKeyCode);
+			for (Module module : ModuleManager.getModules()) {
+				remember(client, module.getKeybind().getKey());
+			}
 			return;
 		}
 
@@ -49,6 +62,21 @@ public final class KeybindManager {
 			client.setScreen(new ClickGuiScreen());
 			return;
 		}
+
+		// Module keybinds (user assigned only). They are checked before the reserved editor
+		// keys, so a key the user explicitly bound to a module always reaches that module
+		// instead of being silently swallowed by an editor shortcut.
+		for (Module module : ModuleManager.getModules()) {
+			KeybindSetting bind = module.getKeybind();
+			if (bind.isNone()) {
+				continue;
+			}
+			if (pressedEdge(client, bind.getKey())) {
+				module.toggle();
+				return;
+			}
+		}
+
 		// Dedicated editors use reserved client keys and never leak into modules.
 		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F6)) {
 			client.setScreen(new ConfigProfilesScreen());
@@ -64,31 +92,27 @@ public final class KeybindManager {
 		}
 		if (pressedEdge(client, org.lwjgl.glfw.GLFW.GLFW_KEY_F9)) {
 			client.setScreen(new CloudConfigsScreen(de.aerialmace.AerialMaceClient.getConfig()));
-			return;
-		}
-
-		// Module keybinds (user-assigned only).
-		for (Module module : ModuleManager.getModules()) {
-			KeybindSetting bind = module.getKeybind();
-			if (bind.isNone()) {
-				continue;
-			}
-			if (pressedEdge(client, bind.getKey())) {
-				module.toggle();
-			}
 		}
 	}
 
 	private static boolean pressedEdge(MinecraftClient client, int keyCode) {
-		boolean now;
-		if (KeybindSetting.isMouseCode(keyCode)) {
-			now = org.lwjgl.glfw.GLFW.glfwGetMouseButton(client.getWindow().getHandle(),
-					KeybindSetting.mouseCodeOf(keyCode)) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
-		} else {
-			now = InputUtil.isKeyPressed(client.getWindow(), keyCode);
-		}
-		Boolean previous = PREVIOUS_STATES.get(keyCode);
-		PREVIOUS_STATES.put(keyCode, now);
+		boolean now = isPressed(client, keyCode);
+		Boolean previous = PREVIOUS_STATES.put(keyCode, now);
 		return now && !Boolean.TRUE.equals(previous);
+	}
+
+	/** Records the current state of a key without acting on it. */
+	private static void remember(MinecraftClient client, int keyCode) {
+		if (keyCode != KeybindSetting.NONE) {
+			PREVIOUS_STATES.put(keyCode, isPressed(client, keyCode));
+		}
+	}
+
+	private static boolean isPressed(MinecraftClient client, int keyCode) {
+		if (KeybindSetting.isMouseCode(keyCode)) {
+			return org.lwjgl.glfw.GLFW.glfwGetMouseButton(client.getWindow().getHandle(),
+					KeybindSetting.mouseCodeOf(keyCode)) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
+		}
+		return InputUtil.isKeyPressed(client.getWindow(), keyCode);
 	}
 }

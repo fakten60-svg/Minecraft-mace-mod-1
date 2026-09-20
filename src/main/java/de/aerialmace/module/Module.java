@@ -75,6 +75,9 @@ public abstract class Module {
 	public void setEnabled(boolean value) {
 		if (this.enabled != value) {
 			this.enabled = value;
+			// Persist toggles that happen outside the ClickGUI (keybind, HUD editor, cloud
+			// config). The write itself is deferred and coalesced by the config layer.
+			de.aerialmace.config.ConfigManager.markDirty();
 			onEnabledChanged(value);
 			for (Runnable listener : toggleListeners) {
 				listener.run();
@@ -97,6 +100,14 @@ public abstract class Module {
 
 	/** Hook for modules with per-tick client behavior. */
 	protected void onTick(net.minecraft.client.MinecraftClient client) {
+	}
+
+	/**
+	 * Re-reads this module's values from its backing configuration. Called after a config
+	 * load, a profile switch or an applied cloud config, so the GUI always shows the values
+	 * the actual logic is using (and vice versa). No-op by default.
+	 */
+	public void refreshFromSource() {
 	}
 
 	/** Hook for subclasses; the base class only tracks the flag. */

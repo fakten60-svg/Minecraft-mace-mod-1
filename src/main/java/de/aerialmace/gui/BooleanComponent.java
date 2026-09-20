@@ -12,12 +12,20 @@ public class BooleanComponent extends SettingComponent {
 
 	private final BooleanSetting booleanSetting;
 	private final Animation toggleAnim = new Animation(1.6f);
+	private boolean lastValue;
 
 	public BooleanComponent(BooleanSetting setting, GuiCallback callback) {
 		super(setting, callback);
 		this.booleanSetting = setting;
-		toggleAnim.setInstant(setting.getValue());
-		toggleAnim.open();
+		this.lastValue = setting.getValue();
+		// Start at the opposite position and animate towards the real value, so an OFF
+		// setting never renders as ON (and vice versa) when the GUI is opened.
+		toggleAnim.setInstant(!setting.getValue());
+		if (setting.getValue()) {
+			toggleAnim.open();
+		} else {
+			toggleAnim.close();
+		}
 	}
 
 	@Override
@@ -46,6 +54,17 @@ public class BooleanComponent extends SettingComponent {
 
 	@Override
 	public void update(float deltaSeconds) {
+		// Keep the knob in sync when the value changes outside this component
+		// (config load, profile load, reset actions).
+		boolean current = booleanSetting.getValue();
+		if (current != lastValue) {
+			lastValue = current;
+			if (current) {
+				toggleAnim.open();
+			} else {
+				toggleAnim.close();
+			}
+		}
 		toggleAnim.update(deltaSeconds);
 	}
 
